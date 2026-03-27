@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 猜數字遊戲</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 48px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 480px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #8892b0;
+            margin-bottom: 32px;
+            font-size: 0.95rem;
+        }
+
+        .range-badge {
+            display: inline-block;
+            background: rgba(0, 217, 255, 0.15);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            color: #00d9ff;
+            margin-bottom: 32px;
+        }
+
+        .game-area {
+            margin: 32px 0;
+        }
+
+        .status {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            min-height: 40px;
+            color: #ccd6f6;
+        }
+
+        .status.hint {
+            font-size: 1.8rem;
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        .status.hint.up::after { content: " ↑ 太大了！"; color: #ff6b6b; }
+        .status.hint.down::after { content: " ↓ 太小了！"; color: #4ecdc4; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .guess-history {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            min-height: 40px;
+        }
+
+        .guess-bubble {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            animation: popIn 0.3s ease;
+        }
+
+        .guess-bubble.too-high {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.4);
+            color: #ff6b6b;
+        }
+
+        .guess-bubble.too-low {
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid rgba(78, 205, 196, 0.4);
+            color: #4ecdc4;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        input[type="number"] {
+            width: 160px;
+            padding: 14px 20px;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            border-color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+
+        input[type="number"]::placeholder {
+            color: #5a6a8a;
+        }
+
+        button {
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-start {
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+            font-size: 1.1rem;
+            padding: 16px 40px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-guess {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: #fff;
+        }
+
+        .btn-guess:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-guess:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00d9ff;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #8892b0;
+            margin-top: 4px;
+        }
+
+        .win-screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .win-screen.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .win-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .win-message {
+            font-size: 1.4rem;
+            color: #00ff88;
+            margin-bottom: 8px;
+        }
+
+        .win-detail {
+            color: #8892b0;
+            margin-bottom: 24px;
+        }
+
+        .attempts-bar {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .attempt-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+        }
+
+        .attempt-dot.used {
+            background: rgba(255, 107, 107, 0.6);
+            border-color: #ff6b6b;
+        }
+
+        .lose-screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .lose-screen.show {
+            display: block;
+        }
+
+        .lose-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .lose-message {
+            font-size: 1.4rem;
+            color: #ff6b6b;
+            margin-bottom: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 猜數字遊戲</h1>
+        <p class="subtitle">系統想了一個 0~100 的數字，猜到它為止！</p>
+        
+        <div class="range-badge">0 ～ 100</div>
+
+        <div id="startScreen">
+            <button class="btn-start" onclick="startGame()">🎮 開始遊戲</button>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="game-area">
+                <div id="status" class="status">系統已設定數字，開始猜吧！</div>
+                <div id="attemptsBar" class="attempts-bar"></div>
+                <div id="history" class="guess-history"></div>
+                <div class="input-group">
+                    <input type="number" id="guessInput" min="0" max="100" placeholder="輸入數字" onkeypress="handleKeyPress(event)">
+                    <button class="btn-guess" id="guessBtn" onclick="makeGuess()">猜！</button>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="rounds">0</div>
+                    <div class="stat-label">猜測次數</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="remaining">10</div>
+                    <div class="stat-label">剩餘機會</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="winScreen" class="win-screen">
+            <div class="win-icon">🎉</div>
+            <div class="win-message">恭喜猜對了！</div>
+            <div class="win-detail">數字是 <strong id="finalNumber">?</strong>，你總共猜了 <strong id="finalRounds">0</strong> 次</div>
+            <button class="btn-start" onclick="startGame()">再玩一次</button>
+        </div>
+
+        <div id="loseScreen" class="lose-screen">
+            <div class="lose-icon">😢</div>
+            <div class="lose-message">挑戰失敗！</div>
+            <div class="win-detail">正確答案是 <strong id="loseNumber">?</strong>，機會用完了！</div>
+            <button class="btn-start" onclick="startGame()">再試一次</button>
+        </div>
+    </div>
+
+    <script>
+        const MAX_ATTEMPTS = 10;
+        let secretNumber = 0;
+        let round = 0;
+        let gameStarted = false;
+
+        function startGame() {
+            secretNumber = Math.floor(Math.random() * 101);
+            round = 0;
+            gameStarted = true;
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('winScreen').classList.remove('show');
+            document.getElementById('loseScreen').classList.remove('show');
+
+            document.getElementById('status').textContent = '系統已設定數字，開始猜吧！';
+            document.getElementById('status').className = 'status';
+            document.getElementById('history').innerHTML = '';
+            document.getElementById('rounds').textContent = '0';
+            document.getElementById('remaining').textContent = MAX_ATTEMPTS;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('guessBtn').disabled = false;
+
+            // 建立機會點
+            const bar = document.getElementById('attemptsBar');
+            bar.innerHTML = '';
+            for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'attempt-dot';
+                dot.id = 'dot-' + i;
+                bar.appendChild(dot);
+            }
+
+            setTimeout(() => {
+                document.getElementById('guessInput').focus();
+            }, 100);
+        }
+
+        function makeGuess() {
+            if (!gameStarted) return;
+
+            const input = document.getElementById('guessInput');
+            const guess = parseInt(input.value);
+
+            if (isNaN(guess) || guess < 0 || guess > 100) {
+                document.getElementById('status').textContent = '⚠️ 請輸入 0~100 的數字！';
+                document.getElementById('status').className = 'status';
+                return;
+            }
+
+            round++;
+            document.getElementById('rounds').textContent = round;
+            document.getElementById('remaining').textContent = MAX_ATTEMPTS - round;
+
+            // 標記已用機會點
+            const dot = document.getElementById('dot-' + (round - 1));
+            if (dot) dot.classList.add('used');
+
+            const historyDiv = document.getElementById('history');
+
+            if (guess === secretNumber) {
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('winScreen').classList.add('show');
+                document.getElementById('finalNumber').textContent = secretNumber;
+                document.getElementById('finalRounds').textContent = round;
+                gameStarted = false;
+            } else if (round >= MAX_ATTEMPTS) {
+                // 用完機會
+                addBubble(historyDiv, guess, guess > secretNumber ? 'too-high' : 'too-low');
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('loseScreen').classList.add('show');
+                document.getElementById('loseNumber').textContent = secretNumber;
+                gameStarted = false;
+            } else if (guess > secretNumber) {
+                document.getElementById('status').textContent = guess;
+                document.getElementById('status').className = 'status hint up';
+                addBubble(historyDiv, guess + ' ↑', 'too-high');
+            } else {
+                document.getElementById('status').textContent = guess;
+                document.getElementById('status').className = 'status hint down';
+                addBubble(historyDiv, guess + ' ↓', 'too-low');
+            }
+
+            input.value = '';
+            input.focus();
+        }
+
+        function addBubble(container, value, type) {
+            const bubble = document.createElement('span');
+            bubble.className = 'guess-bubble ' + type;
+            bubble.textContent = value;
+            container.appendChild(bubble);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                makeGuess();
+            }
+        }
+    </script>
+</body>
+</html>
