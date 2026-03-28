@@ -493,7 +493,7 @@
             document.getElementById('skillLeft').textContent = game.skillUses;
             document.getElementById('skillCount').textContent = game.skillUses;
             let h = game.hand.length===0?'<div style="color:#8892b0">尚未抽牌</div>':'';
-            game.hand.forEach(c => { h += '<span style="display:inline-block;background:rgba(0,0,0,0.3);padding:4px 8px;border-radius:6px;margin:2px;font-size:0.75rem">'+c.icon+c.name+'⚔'+c.atk+'🛡'+c.def+'</span> '; });
+            game.hand.forEach(c => { h += '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.3);padding:3px 8px;border-radius:20px;margin:2px;font-size:0.7rem">'+c.icon+' '+c.name+' ⚔'+c.atk+'</span> '; });
             document.getElementById('cardArea').innerHTML = h;
             if (game.boss) { const b = document.getElementById('bossBar'); if(b) b.style.width = Math.max(0,game.boss.hp/game.boss.maxHp*100)+'%'; }
             let s = '';
