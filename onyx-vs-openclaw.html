@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onyx vs OpenClaw 比較</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        th {
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+            color: #00d9ff;
+            font-size: 1.1rem;
+        }
+        th:first-child {
+            color: #fff;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .check { color: #00ff88; font-size: 1.2rem; }
+        .cross { color: #ff6b6b; font-size: 1.2rem; }
+        .partial { color: #fee140; font-size: 0.9rem; }
+        .onyx-col { background: rgba(102, 126, 234, 0.1); }
+        .openclaw-col { background: rgba(0, 217, 255, 0.1); }
+        .feature-category {
+            background: rgba(255,255,255,0.15);
+            font-weight: bold;
+            color: #a855f7;
+        }
+        .winner {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+        }
+        .winner-onyx { background: rgba(102, 126, 234, 0.3); color: #a855f7; }
+        .winner-openclaw { background: rgba(0, 217, 255, 0.3); color: #00d9ff; }
+        .winner-both { background: rgba(0, 255, 136, 0.3); color: #00ff88; }
+        .winner-none { background: rgba(255, 107, 107, 0.3); color: #ff6b6b; }
+        .summary {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 25px;
+        }
+        .summary h2 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #00d9ff;
+        }
+        .summary-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+        }
+        .summary-icon {
+            font-size: 1.5rem;
+        }
+        .summary-text strong {
+            color: #00d9ff;
+        }
+        .recommend {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 255, 136, 0.2));
+            border-radius: 12px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+        .recommend h3 {
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 1.5rem; }
+            th, td { padding: 12px 10px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚔️ Onyx vs OpenClaw 比較表</h1>
+        
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>功能</th>
+                        <th class="onyx-col">Onyx</th>
+                        <th class="openclaw-col">OpenClaw</th>
+                        <th>勝者</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="feature-category" colspan="4">📌 定位</td>
+                    </tr>
+                    <tr>
+                        <td>定位</td>
+                        <td class="onyx-col">AI Chat UI</td>
+                        <td class="openclaw-col">Agent 平台</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>開源</td>
+                        <td class="onyx-col">✅ MIT</td>
+                        <td class="openclaw-col">✅ MIT</td>
+                        <td><span class="winner winner-both"> both</span></td>
+                    </tr>
+                    <tr>
+                        <td class="feature-category" colspan="4">🤖 Agents</td>
+                    </tr>
+                    <tr>
+                        <td>自訂 Agents</td>
+                        <td class="onyx-col"><span class="check">✅</span></td>
+                        <td class="openclaw-col"><span class="check">✅</span></td>
+                        <td><span class="winner winner-both"> both</span></td>
+                    </tr>
+                    <tr>
+                        <td>多 Agent 協調</td>
+                        <td class="onyx-col"><span class="cross">❌</span></td>
+                        <td class="openclaw-col"><span class="check">✅ GSwitch</span></td>
+                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
+                    </tr>
+                    <tr>
+                        <td class="feature-category" colspan="4">🌐 搜尋與爬蟲</td>
+                    </tr>
+                    <tr>
+                        <td>Web Search</td>
+                        <td class="onyx-col"><span class="check">✅ 4種引擎</span></td>
+                        <td class="openclaw-col"><span class="partial">⚠️ 一般</span></td>
+                        <td><span class="winner winner-onyx"> Onyx</span></td>
+                    </tr>
+                    <tr>
+                        <td>Web Scraping</td>
+                        <td class="onyx-col"><span class="check">✅ Firecrawl</span></td>
+                        <td class="openclaw-col"><span class="partial">⚠️ 有限</span></td>
+                        <td><span class="winner winner-onyx"> Onyx</span></td>
+                    </tr>
+                    <tr>
+                        <td>瀏覽器控制</td>
+                        <td class="onyx-col"><span class="cross">❌</span></td>
+                        <td class="openclaw-col"><span class="check">✅ bb-browser</span></td>
+                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
+                    </tr>
+                    <tr>
+                        <td class="feature-category" colspan="4">📚 知識庫 RAG</td>
+                    </tr>
+                    <tr>
+                        <td>RAG</td>
+                        <td class="onyx-col"><span class="check">✅ 強</span></td>
+                        <td class="openclaw-col"><span class="partial">⚠️ 需設定</span></td>
+                        <td><span class="winner winner-onyx"> Onyx</span></td>
+                    </tr>
+                    <tr>
+                        <td>Connectors</td>
+                        <td class="onyx-col"><span class="check">✅ 40+</span></td>
+                        <td class="openclaw-col"><span class="partial">⚠️ MCP</span></td>
+                        <td><span class="winner winner-onyx"> Onyx</span></td>
+                    </tr>
+                    <tr>
+                        <td>Deep Research</td>
+                        <td class="onyx-col"><span class="check">✅</span></td>
+                        <td class="openclaw-col"><span class="cross">❌</span></td>
+                        <td><span class="winner winner-onyx"> Onyx</span></td>
+                    </tr>
+                    <tr>
+                        <td class="feature-category" colspan="4">💬 平台整合</td>
+                    </tr>
+                    <tr>
+                        <td>Telegram</td>
+                        <td class="onyx-col"><span class="cross">❌</span></td>
+                        <td class="openclaw-col"><span class="check">✅</span></td>
+                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
+                    </tr>
+                    <tr>
+                        <td>Discord</td>
+                        <td class="onyx-col"><span class="cross">❌</span></td>
+                        <td class="openclaw-col"><span class="check">✅</span></td>
+                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
+                    </tr>
+                    <tr>
+                        <td>WhatsApp</td>
+                        <td class="onyx-col"><span class="cross">❌</span></td>
+                        <td class="openclaw-col"><span class="check">✅</span></td>
+                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
+                    </tr>
+                    <tr>
+                        <td>Slack</td>
+                        <td class="onyx-col"><span class="cross">❌</span></td>
+                        <td class="openclaw-col"><span class="check">✅</span></td>
+                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
+                    </tr>
+                    <tr>
+                        <td class="feature-category" colspan="4">⏰ 自動化</td>
+                    </tr>
+                    <tr>
+                        <td>排程任務（Cron）</td>
+                        <td class="onyx-col"><span class="cross">❌</span></td>
+                        <td class="openclaw-col"><span class="check">✅</span></td>
+                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
+                    </tr>
+                    <tr>
+                        <td>心跳檢查（Heartbeat）</td>
+                        <td class="onyx-col"><span class="cross">❌</span></td>
+                        <td class="openclaw-col"><span class="check">✅</span></td>
+                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
+                    </tr>
+                    <tr>
+                        <td>MCP</td>
+                        <td class="onyx-col"><span class="check">✅</span></td>
+                        <td class="openclaw-col"><span class="check">✅</span></td>
+                        <td><span class="winner winner-both"> both</span></td>
+                    </tr>
+                    <tr>
+                        <td class="feature-category" colspan="4">💻 開發者</td>
+                    </tr>
+                    <tr>
+                        <td>安裝方式</td>
+                        <td class="onyx-col">Docker / 一鍵</td>
+                        <td class="openclaw-col">Docker</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Code Interpreter</td>
+                        <td class="onyx-col"><span class="check">✅</span></td>
+                        <td class="openclaw-col"><span class="cross">❌</span></td>
+                        <td><span class="winner winner-onyx"> Onyx</span></td>
+                    </tr>
+                    <tr>
+                        <td>圖像生成</td>
+                        <td class="onyx-col"><span class="check">✅</span></td>
+                        <td class="openclaw-col"><span class="cross">❌</span></td>
+                        <td><span class="winner winner-onyx"> Onyx</span></td>
+                    </tr>
+                    <tr>
+                        <td class="feature-category" colspan="4">🏢 企業功能</td>
+                    </tr>
+                    <tr>
+                        <td>SSO</td>
+                        <td class="onyx-col"><span class="check">✅</span></td>
+                        <td class="openclaw-col"><span class="cross">❌</span></td>
+                        <td><span class="winner winner-onyx"> Onyx</span></td>
+                    </tr>
+                    <tr>
+                        <td>RBAC</td>
+                        <td class="onyx-col"><span class="check">✅</span></td>
+                        <td class="openclaw-col"><span class="partial">⚠️ 有限</span></td>
+                        <td><span class="winner winner-onyx"> Onyx</span></td>
+                    </tr>
+                    <tr>
+                        <td class="feature-category" colspan="4">💰 價格</td>
+                    </tr>
+                    <tr>
+                        <td>價格</td>
+                        <td class="onyx-col">免費開源</td>
+                        <td class="openclaw-col">免費 + 雲端版</td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary">
+            <h2>📊 總結</h2>
+            
+            <div class="summary-item">
+                <div class="summary-icon">🏆</div>
+                <div class="summary-text">
+                    <strong>Onyx 勝出：</strong>搜尋爬蟲、RAG知識庫、Deep Research、Code Interpreter、圖像生成、企業SSO
+                </div>
+            </div>
+            
+            <div class="summary-item">
+                <div class="summary-icon">🏆</div>
+                <div class="summary-text">
+                    <strong>OpenClaw 勝出：</strong>多 Agent 協調（GSwitch）、平台整合（Telegram/Discord/WhatsApp）、排程自動化、瀏覽器控制
+                </div>
+            </div>
+
+            <div class="recommend">
+                <h3>🎯 建議</h3>
+                <p><strong>選 OpenClaw：</strong>需要多平台整合、自動化排程、多 Agent 協作（已有 GSwitch）</p>
+                <p style="margin-top:10px;"><strong>選 Onyx：</strong>只需要網頁 Chat UI、需要很強的 RAG（企業知識庫）、需要 Deep Research</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
