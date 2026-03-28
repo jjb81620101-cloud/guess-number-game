@@ -387,7 +387,8 @@
                 </div>
             </div>
             <div class="controls">
-                <button class="btn btn-draw" onclick="drawCard()">🎴 抽卡 (50💰)</button>
+                <button class="btn btn-draw" onclick="drawCard()">🎴 單抽 (50💰)</button>
+                <button class="btn" onclick="draw10()" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;">🌟 10連 (500💰)</button>
                 <button class="btn btn-gm" onclick="toggleGM()">⚙️ GM</button>
             </div>
         </div>
@@ -613,10 +614,30 @@
                     <div style="font-size:0.8rem">❤️ ${game.boss.hp}/${game.boss.maxHp} | ⚔️ ${game.boss.atk}</div>
                 </div>
             `;
-            game.hand = [];
+            // 不再清空手牌，卡牌會保留
             game.selectedCard = null;
             renderHand();
             addLog('👹 遇到了 Lv.' + game.level + ' ' + game.boss.name + '！(HP:' + game.boss.hp + ' ATK:' + game.boss.atk + ')', 'damage');
+        }
+
+        function draw10() {
+            if (game.gold < 500) {
+                addLog('⚠️ 10連抽需要500金幣！', 'system');
+                return;
+            }
+            game.gold -= 500;
+            updateStats();
+            
+            addLog('🌟 10連抽！', 'card');
+            for (let i = 0; i < 10; i++) {
+                const card = getRandomCard();
+                card.id = Date.now() + i;
+                game.hand.push(card);
+                addLog('  ' + (i+1) + '. [' + card.rarity.toUpperCase() + '] ' + card.icon + ' ' + card.name, 'card');
+            }
+            game.totalDraws += 10;
+            updateStats();
+            renderHand();
         }
 
         function useCard() {
