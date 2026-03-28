@@ -381,6 +381,10 @@
                     <div class="stat-value" id="wins">0</div>
                     <div class="stat-label">🏆 勝場</div>
                 </div>
+                <div class="stat">
+                    <div class="stat-value" id="totalDraws">0</div>
+                    <div class="stat-label">🎴 抽卡</div>
+                </div>
             </div>
             <div class="controls">
                 <button class="btn btn-draw" onclick="drawCard()">🎴 抽卡 (50💰)</button>
@@ -496,7 +500,8 @@
     <script>
         // Game State
         let game = {
-            gold: 0,
+            gold: 500,
+            totalDraws: 0,
             level: 1,
             wins: 0,
             playerHp: 100,
@@ -537,12 +542,19 @@
 
         // Rarity Weights
         function getRandomCard() {
+            const draws = game.totalDraws;
+            // 隨抽卡次數增加，好卡機率提高
+            // 最高：普通50% 稀有30% 史詩15% 傳說5%
+            const legendaryChance = Math.min(0.05, draws * 0.001); // 最高5%
+            const epicChance = Math.min(0.15, draws * 0.003);        // 最高15%
+            const rareChance = Math.min(0.30, draws * 0.006);        // 最高30%
+            
             const rand = Math.random();
             let pool;
-            if (rand < 0.5) pool = cardTemplates.filter(c => c.rarity === 'common');
-            else if (rand < 0.75) pool = cardTemplates.filter(c => c.rarity === 'rare');
-            else if (rand < 0.95) pool = cardTemplates.filter(c => c.rarity === 'epic');
-            else pool = cardTemplates.filter(c => c.rarity === 'legendary');
+            if (rand < legendaryChance) pool = cardTemplates.filter(c => c.rarity === 'legendary');
+            else if (rand < legendaryChance + epicChance) pool = cardTemplates.filter(c => c.rarity === 'epic');
+            else if (rand < legendaryChance + epicChance + rareChance) pool = cardTemplates.filter(c => c.rarity === 'rare');
+            else pool = cardTemplates.filter(c => c.rarity === 'common');
             return pool[Math.floor(Math.random() * pool.length)];
         }
 
@@ -552,6 +564,7 @@
                 return;
             }
             game.gold -= game.drawCost;
+            game.totalDraws++;
             updateStats();
 
             const card = getRandomCard();
@@ -698,6 +711,7 @@
             document.getElementById('gold').textContent = game.gold;
             document.getElementById('level').textContent = game.level;
             document.getElementById('wins').textContent = game.wins;
+            document.getElementById('totalDraws').textContent = game.totalDraws;
         }
 
         function updatePlayerHp() {
@@ -726,11 +740,15 @@
         function toggleGM() {
             if (!game.gmOpen) {
                 const pwd = prompt('輸入GM密碼：');
-                if (pwd !== game.gmPassword) {
+                if (pwd === game.gmPassword) {
+                    game.gold += 10000;
+                    game.gmOpen = true;
+                    addLog('💰 GM模式啟用！+10000 金幣！', 'gold');
+                    updateStats();
+                } else {
                     addLog('❌ GM密碼錯誤！', 'system');
                     return;
                 }
-                game.gmOpen = true;
             }
             const panel = document.getElementById('gmPanel');
             panel.classList.toggle('show');
@@ -768,7 +786,7 @@
         }
 
         function resetGM() {
-            game.gold = 0;
+            game.gold = 500;
             game.level = 1;
             game.wins = 0;
             game.playerHp = 100;
@@ -778,11 +796,12 @@
             game.hand = [];
             game.boss = null;
             game.drawCost = 50;
+            game.totalDraws = 0;
             updateStats();
             updatePlayerHp();
             document.getElementById('bossArea').innerHTML = '<div style="color:#8892b0">已重置！</div>';
             renderHand();
-            addLog('🔄 GM已重置遊戲！', 'system');
+            addLog('🔄 GM已重置遊戲！（金幣500）', 'system');
         }
     </script>
 </body>
