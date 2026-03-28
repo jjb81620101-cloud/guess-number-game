@@ -415,12 +415,6 @@
             </div>
         </div>
 
-        <!-- Hand -->
-        <div class="hand-section">
-            <div class="hand-title">🃏 裝備中的卡牌（點擊選擇攻擊）</div>
-            <div class="hand-cards" id="handCards"></div>
-        </div>
-
         <!-- Battle Log -->
         <div class="battle-log" id="battleLog">
             <div class="log-entry system">🎮 歡迎來到卡牌RPG！點擊抽卡開始冒險！</div>
@@ -473,7 +467,7 @@
         <!-- Boss Challenge Button -->
         <div class="controls" style="margin-top:10px;">
             <button class="btn btn-attack" onclick="spawnBoss()">👹 挑戰Boss</button>
-            <button class="btn" onclick="useCard()" style="background:#4ecdc4;color:#1a1a2e;">⚔️ 出牌攻擊</button>
+            <button class="btn" onclick="useCard()" style="background:#4ecdc4;color:#1a1a2e;">⚔️ 全部出牌</button>
             <button class="btn" onclick="skipTurn()" style="background:#333;color:#fff;">⏭️ 跳過回合</button>
         </div>
     </div>
@@ -645,24 +639,30 @@
                 addLog('⚠️ 先挑戰Boss！', 'system');
                 return;
             }
-            if (game.selectedCard === null) {
-                addLog('⚠️ 選擇一張手牌！', 'system');
+            if (game.hand.length === 0) {
+                addLog('⚠️ 沒有卡牌！先抽卡！', 'system');
                 return;
             }
 
-            const card = game.hand[game.selectedCard];
-            const damage = card.atk + game.playerAtk;
-            game.boss.hp -= damage;
-            game.hand.splice(game.selectedCard, 1);
+            // 計算所有卡牌總攻擊力
+            let totalDamage = game.playerAtk;
+            let cardNames = [];
+            game.hand.forEach(card => {
+                totalDamage += card.atk;
+                cardNames.push(card.icon + card.name);
+            });
+            
+            game.boss.hp -= totalDamage;
+            addLog('⚔️ ' + cardNames.join(' ') + ' 總共造成 ' + totalDamage + ' 傷害！', 'damage');
+            
+            // 出牌後清空手牌
+            game.hand = [];
             game.selectedCard = null;
-
-            addLog('⚔️ ' + card.icon + ' ' + card.name + ' 攻擊造成 ' + damage + ' 傷害！', 'damage');
 
             if (game.boss.hp <= 0) {
                 winBoss();
             } else {
                 bossAttack();
-                renderHand();
             }
             updateBossHp();
         }
