@@ -1,528 +1,478 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🃏 卡牌RPG - 抽卡打Boss</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            color: #fff;
-        }
-        .game-container { max-width: 900px; margin: 0 auto; padding: 20px; }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 16px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .player-stats { display: flex; gap: 15px; flex-wrap: wrap; }
-        .stat { text-align: center; }
-        .stat-value { font-size: 1.2rem; font-weight: bold; color: #00d9ff; }
-        .stat-label { font-size: 0.65rem; color: #8892b0; }
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-        }
-        .btn-draw { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: #fff; }
-        .btn-draw:hover { transform: translateY(-2px); }
-        .btn-attack { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: #1a1a2e; }
-        .btn-gm { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
-        .btn-shop { background: linear-gradient(135deg, #00d9ff 0%, #00ff88 100%); color: #1a1a2e; }
-        .btn-skill { background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%); color: #fff; }
-        .battle-area { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .card-box, .boss-box {
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            min-height: 180px;
-        }
-        .boss-box { border: 2px solid rgba(255, 107, 107, 0.3); }
-        .boss-card {
-            background: linear-gradient(135deg, #2d1b4e, #4a1942);
-            border-radius: 16px;
-            padding: 20px;
-            width: 140px;
-            margin: 0 auto;
-        }
-        .boss-icon { font-size: 3rem; }
-        .boss-name { font-size: 0.9rem; font-weight: bold; margin: 8px 0 5px; color: #ff6b6b; }
-        .boss-hp-bar { width: 100%; height: 8px; background: #333; border-radius: 4px; margin: 8px 0; overflow: hidden; }
-        .boss-hp-fill { height: 100%; background: linear-gradient(90deg, #ff6b6b, #fee140); transition: width 0.5s; }
-        .battle-log {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 15px;
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 0.8rem;
-            margin-bottom: 20px;
-        }
-        .log-entry { margin-bottom: 5px; padding: 5px 10px; border-radius: 5px; }
-        .log-entry.damage { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
-        .log-entry.heal { background: rgba(78, 205, 196, 0.2); color: #4ecdc4; }
-        .log-entry.gold { background: rgba(255, 217, 61, 0.2); color: #fee140; }
-        .log-entry.card { background: rgba(0, 217, 255, 0.2); color: #00d9ff; }
-        .log-entry.system { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
-        .log-entry.skill { background: rgba(255, 107, 107, 0.3); color: #ff8e53; }
-        .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px; }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-        .overlay.show { display: flex; }
-        .overlay-content {
-            background: rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 30px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        .overlay-icon { font-size: 4rem; }
-        .overlay-title { font-size: 1.5rem; margin: 15px 0 10px; }
-        .overlay-gold { color: #fee140; margin-bottom: 15px; }
-        .shop-panel {
-            display: none;
-            background: rgba(0, 217, 255, 0.1);
-            border: 2px solid rgba(0, 217, 255, 0.3);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .shop-panel.show { display: block; }
-        .shop-title { font-size: 1.2rem; color: #00d9ff; margin-bottom: 15px; text-align: center; }
-        .shop-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-        .shop-item {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .shop-item:hover { transform: translateY(-3px); }
-        .shop-item.disabled { opacity: 0.4; cursor: not-allowed; }
-        .shop-item-icon { font-size: 2rem; margin-bottom: 8px; }
-        .shop-item-name { font-weight: bold; margin-bottom: 5px; }
-        .shop-item-desc { font-size: 0.7rem; color: #8892b0; margin-bottom: 8px; }
-        .shop-item-price { color: #fee140; font-weight: bold; }
-        .skills-panel {
-            display: none;
-            background: rgba(255, 107, 107, 0.1);
-            border: 2px solid rgba(255, 107, 107, 0.3);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .skills-panel.show { display: block; }
-        .skills-title { font-size: 1.1rem; color: #ff6b6b; margin-bottom: 12px; text-align: center; }
-        .skill-item {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .skill-item:hover { transform: translateX(5px); }
-        .skill-icon { font-size: 1.5rem; margin-right: 10px; }
-        .skill-name { font-weight: bold; }
-        .skill-desc { font-size: 0.7rem; color: #8892b0; }
-        .skill-cost { color: #fee140; font-size: 0.8rem; }
-        .tutorial-box {
-            background: rgba(0, 255, 136, 0.1);
-            border: 2px solid rgba(0, 255, 136, 0.3);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-        }
-        .tutorial-title { color: #00ff88; font-weight: bold; margin-bottom: 10px; }
-        .tutorial-step { margin-bottom: 6px; padding-left: 8px; }
-        .backpack-info {
-            background: rgba(255, 217, 61, 0.1);
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 0.85rem;
-        }
-        .hp-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
-        .hp-fill { height: 100%; background: linear-gradient(90deg, #4ecdc4, #00d9ff); transition: width 0.3s; }
-        .gm-panel {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1a1a2e;
-            border: 2px solid #667eea;
-            border-radius: 16px;
-            padding: 20px;
-            z-index: 200;
-            min-width: 280px;
-        }
-        .gm-panel.show { display: block; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>卡牌RPG</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Segoe UI,Tahoma,sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460;min-height:100vh;color:#fff}
+.gc{max-width:900px;margin:0 auto;padding:15px}
+.hdr{background:rgba(255,255,255,0.08);border-radius:16px;padding:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.sts{display:flex;gap:12px;flex-wrap:wrap}
+.st{text-align:center}
+.v{font-size:1.1rem;font-weight:bold;color:#00d9ff}
+.lb{font-size:0.6rem;color:#8892b0}
+.btn{padding:7px 14px;border:none;border-radius:10px;cursor:pointer;font-weight:600;font-size:0.8rem;transition:all 0.3s}
+.btn:hover{transform:translateY(-2px)}
+.b1{background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff}
+.b2{background:linear-gradient(135deg,#fa709a,#fee140);color:#1a1a2e}
+.b3{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+.b4{background:linear-gradient(135deg,#00d9ff,#00ff88);color:#1a1a2e}
+.b5{background:linear-gradient(135deg,#ff6b6b,#ff8e53);color:#fff}
+.bar{background:rgba(255,217,61,0.1);border-radius:12px;padding:8px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.bn{padding:6px 10px;font-size:0.7rem;min-width:70px;text-align:center;cursor:pointer;border-radius:10px}
+.bn:disabled{opacity:0.4;cursor:not-allowed}
+.inf{background:rgba(0,0,0,0.2);border-radius:10px;padding:8px;margin-bottom:10px;font-size:0.8rem;text-align:center}
+.hpbar{width:100%;height:5px;background:#333;border-radius:3px;overflow:hidden;margin-bottom:5px}
+.hpf{height:100%;background:linear-gradient(90deg,#4ecdc4,#00d9ff);transition:width 0.3s}
+.ar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.bx{background:rgba(255,255,255,0.05);border-radius:12px;padding:12px;text-align:center;min-height:100px;font-size:0.8rem}
+.bossBx{border:2px solid rgba(255,107,107,0.3)}
+.bossCard{background:linear-gradient(135deg,#2d1b4e,#4a1942);border-radius:12px;padding:10px;width:110px;margin:0 auto}
+.bossNm{font-size:0.75rem;font-weight:bold;color:#ff6b6b;margin:4px 0}
+.bossHpBar{width:100%;height:5px;background:#333;border-radius:4px;margin:4px 0;overflow:hidden}
+.bossHpF{height:100%;background:linear-gradient(90deg,#ff6b6b,#fee140);transition:width 0.5s}
+.bossDmg{font-size:0.65rem;color:#ff6b6b}
+.logs{background:rgba(0,0,0,0.3);border-radius:10px;padding:10px;max-height:100px;overflow-y:auto;font-size:0.7rem;margin-bottom:12px}
+.le{margin-bottom:3px;padding:3px 7px;border-radius:5px}
+.dmg{background:rgba(255,107,107,0.2);color:#ff6b6b}
+.hl{background:rgba(78,205,196,0.2);color:#4ecdc4}
+.gold{background:rgba(255,217,61,0.2);color:#fee140}
+.cardR{background:rgba(0,217,255,0.2);color:#00d9ff}
+.sys{background:rgba(168,85,247,0.2);color:#a855f7}
+.ctls{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.pnl{display:none;background:rgba(0,217,255,0.1);border:2px solid rgba(0,217,255,0.3);border-radius:14px;padding:14px;margin-bottom:12px}
+.pnl.show{display:block}
+.ptl{font-size:1rem;color:#00d9ff;margin-bottom:10px;text-align:center;font-weight:bold}
+.itm{background:rgba(0,0,0,0.3);border-radius:10px;padding:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.itm:hover{background:rgba(0,0,0,0.5)}
+.itmDis{cursor:not-allowed;opacity:0.4}
+.itLbl{font-size:0.75rem;color:#fee140;font-weight:bold}
+.ov{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:100}
+.ov.show{display:flex}
+.oc{background:rgba(255,255,255,0.1);border-radius:20px;padding:25px;text-align:center;max-width:320px}
+.ok{font-size:2.5rem}
+.ot{font-size:1.2rem;margin:8px 0}
+.og{color:#fee140;margin-bottom:8px;font-weight:bold}
+.gmP{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a2e;border:2px solid #667eea;border-radius:16px;padding:20px;z-index:200;min-width:240px}
+.gmP.show{display:block}
+.gmi{margin-bottom:10px}
+.gml{display:block;margin-bottom:5px;font-size:0.8rem;color:#8892b0}
+.gmi input{width:100%;padding:8px;border-radius:8px;background:#333;color:#fff;border:1px solid #555;box-sizing:border-box}
+</style>
 </head>
 <body>
-    <div class="game-container">
-        <!-- Tutorial -->
-        <div class="tutorial-box">
-            <div class="tutorial-title">🎮 新手教學</div>
-            <div class="tutorial-step">1️⃣ 點擊「🎴 抽卡」或「🌟 10連抽」獲得卡牌</div>
-            <div class="tutorial-step">2️⃣ 點擊「👹 挑戰Boss」開始戰鬥</div>
-            <div class="tutorial-step">3️⃣ 使用「⚔️ 出牌」用所有卡牌攻擊</div>
-            <div class="tutorial-step">4️⃣ 使用「⚡ 技能」造成雙倍傷害/治療（每天3次）</div>
-            <div class="tutorial-step">5️⃣ 挑戰成功可到「🏪 商店」購買道具</div>
-        </div>
+<div class="gc">
+<div class="hdr">
+<div class="sts">
+<div class="st"><div class="v" id="goldDisp">500</div><div class="lb">💰</div></div>
+<div class="st"><div class="v" id="lvlDisp">1</div><div class="lb">⭐</div></div>
+<div class="st"><div class="v" id="winsDisp">0</div><div class="lb">🏆</div></div>
+</div>
+<div class="ctls">
+<button class="btn b1" onclick="drawCard()">🎴</button>
+<button class="btn b1" onclick="draw10()">🌟</button>
+<button class="btn b3" onclick="toggleGM()">⚙️</button>
+</div>
+</div>
 
-        <!-- Header -->
-        <div class="header">
-            <div class="player-stats">
-                <div class="stat"><div class="stat-value" id="gold">500</div><div class="stat-label">💰</div></div>
-                <div class="stat"><div class="stat-value" id="level">1</div><div class="stat-label">⭐</div></div>
-                <div class="stat"><div class="stat-value" id="wins">0</div><div class="stat-label">🏆</div></div>
-            </div>
-            <div class="controls">
-                <button class="btn btn-draw" onclick="drawCard()">🎴 單抽</button>
-                <button class="btn btn-draw" onclick="draw10()">🌟 10連</button>
-                <button class="btn btn-gm" onclick="toggleGM()">⚙️</button>
-            </div>
-        </div>
+<div class="bar">
+<button class="btn b4 bn" id="dailyBtn" onclick="claimDaily()">🎁<br><small>+100</small></button>
+<button class="btn b4 bn" id="adBtn" onclick="watchAd()">📺<br><small>+50</small></button>
+<button class="btn b5 bn" onclick="toggleEarn()">🗺️<br><small>賺錢</small></button>
+</div>
 
-        <!-- HP & Backpack Info -->
-        <div class="backpack-info">
-            <div class="hp-bar"><div class="hp-fill" id="playerHpFill" style="width:100%"></div></div>
-            <div>❤️ <span id="playerHp">100</span>/<span id="playerMaxHp">100</span>　🎒 <span id="handCount">0</span>/20　⚡ 技能:<span id="skillLeft">3</span>/3</div>
-        </div>
+<div class="inf">
+<div class="hpbar"><div class="hpf" id="hpBar" style="width:100%"></div></div>
+❤️ <span id="hpText">100</span>/<span id="maxHpText">100</span>
+　🎒<span id="handCount">0</span>/20
+　⚡技能<span id="skillCount">3</span>
+</div>
 
-        <!-- Battle Area -->
-        <div class="battle-area">
-            <div class="boss-box">
-                <div style="color:#8892b0;margin-bottom:10px">👹 Boss</div>
-                <div id="bossArea" style="color:#8892b0">點擊挑戰Boss開始！</div>
-            </div>
-            <div class="card-box">
-                <div style="color:#8892b0;margin-bottom:10px">🃏 持有卡牌</div>
-                <div id="cardArea" style="color:#8892b0">尚未抽牌</div>
-            </div>
-        </div>
+<div class="ar">
+<div class="bx bossBx">
+<div style="color:#8892b0;margin-bottom:8px">👹 Boss</div>
+<div id="bossArea" style="color:#8892b0">點挑戰</div>
+</div>
+<div class="bx">
+<div style="color:#8892b0;margin-bottom:8px">🃏 手牌</div>
+<div id="handArea" style="color:#8892b0">未抽</div>
+</div>
+</div>
 
-        <!-- Skills Panel -->
-        <div class="skills-panel" id="skillsPanel">
-            <div class="skills-title">⚡ 技能（今日剩餘 <span id="skillCount">3</span> 次）</div>
-            <div class="skill-item" onclick="useSkill('fireball')">
-                <div>
-                    <span class="skill-icon">🔥</span>
-                    <span class="skill-name">火焰彈</span>
-                    <div class="skill-desc">雙倍傷害（消耗全部手牌）</div>
-                </div>
-                <div class="skill-cost">⚡1次</div>
-            </div>
-            <div class="skill-item" onclick="useSkill('heal')">
-                <div>
-                    <span class="skill-icon">💚</span>
-                    <span class="skill-name">生命恢復</span>
-                    <div class="skill-desc">+30 HP</div>
-                </div>
-                <div class="skill-cost">⚡1次</div>
-            </div>
-        </div>
+<div class="pnl" id="earnPnl">
+<div class="ptl">🗺️ 探索地圖</div>
+<div class="itm" onclick="explore('easy')">
+<div>
+<div style="font-weight:bold">🌳 森林</div>
+<div style="font-size:0.65rem;color:#8892b0">低風險</div>
+</div>
+<div class="itLbl">+20~40💰</div>
+</div>
+<div class="itm" onclick="explore('med')">
+<div>
+<div style="font-weight:bold">🏔️ 山脈</div>
+<div style="font-size:0.65rem;color:#8892b0">中風險</div>
+</div>
+<div class="itLbl">+50~100💰</div>
+</div>
+<div class="itm" onclick="explore('hard')">
+<div>
+<div style="font-weight:bold">🔥 深淵</div>
+<div style="font-size:0.65rem;color:#8892b0">高風險高回報</div>
+</div>
+<div class="itLbl">+100~200💰</div>
+</div>
+</div>
 
-        <!-- Shop Panel -->
-        <div class="shop-panel" id="shopPanel">
-            <div class="shop-title">🏪 卡牌商店</div>
-            <div class="shop-items" id="shopItems"></div>
-        </div>
+<div class="logs" id="logBox">
+<div class="le sys">🎮 系統就緒！新功能：探索地圖、每日登入、觀看廣告！</div>
+</div>
 
-        <!-- Battle Log -->
-        <div class="battle-log" id="battleLog">
-            <div class="log-entry system">🎮 歡迎！新功能：技能🔥💚、商店🏪、背包20張！</div>
-        </div>
+<div class="ctls">
+<button class="btn b2" onclick="spawnBoss()">👹</button>
+<button class="btn b2" onclick="attackAll()">⚔️</button>
+<button class="btn b1" onclick="skipTurn()">⏭️</button>
+<button class="btn b4" onclick="toggleShop()">🏪</button>
+</div>
 
-        <!-- Controls -->
-        <div class="controls">
-            <button class="btn btn-attack" onclick="spawnBoss()">👹 Boss</button>
-            <button class="btn btn-attack" onclick="useAllCards()">⚔️ 出牌</button>
-            <button class="btn btn-skill" onclick="toggleSkills()">⚡技能</button>
-            <button class="btn btn-shop" onclick="toggleShop()">🏪商店</button>
-            <button class="btn btn-attack" onclick="skipTurn()">⏭️跳過</button>
-        </div>
-    </div>
+<div class="pnl" id="shopPnl">
+<div class="ptl">🏪 商店</div>
+<div id="shopList"></div>
+</div>
 
-    <!-- Win Overlay -->
-    <div class="overlay" id="winOverlay">
-        <div class="overlay-content">
-            <div class="overlay-icon">🏆</div>
-            <div class="overlay-title">勝利！</div>
-            <div class="overlay-gold" id="winGold">+100 💰</div>
-            <button class="btn btn-attack" onclick="closeWin()">繼續</button>
-        </div>
-    </div>
+<div class="ov" id="winOverlay">
+<div class="oc">
+<div class="ok">🏆</div>
+<div class="ot">勝利！</div>
+<div class="og" id="winReward">+100💰</div>
+<button class="btn b2" onclick="closeWin()">繼續</button>
+</div>
+</div>
 
-    <!-- Lose Overlay -->
-    <div class="overlay" id="loseOverlay">
-        <div class="overlay-content">
-            <div class="overlay-icon">💀</div>
-            <div class="overlay-title">失敗...</div>
-            <button class="btn btn-draw" onclick="revive()">🔄 復活</button>
-        </div>
-    </div>
+<div class="ov" id="loseOverlay">
+<div class="oc">
+<div class="ok">💀</div>
+<div class="ot">失敗...</div>
+<button class="btn b1" onclick="revive()">🔄 復活</button>
+</div>
+</div>
 
-    <!-- GM Panel -->
-    <div class="gm-panel" id="gmPanel">
-        <h3 style="color:#667eea;margin-bottom:15px">⚙️ GM面板</h3>
-        <div style="margin-bottom:10px">
-            <label style="display:block;margin-bottom:5px">💰 金幣：</label>
-            <input type="number" id="gmGold" value="500" style="width:100%;padding:8px;border-radius:8px;background:#333;color:#fff;border:1px solid #555">
-        </div>
-        <div style="margin-bottom:10px">
-            <label style="display:block;margin-bottom:5px">❤️ HP：</label>
-            <input type="number" id="gmHp" value="100" style="width:100%;padding:8px;border-radius:8px;background:#333;color:#fff;border:1px solid #555">
-        </div>
-        <div style="display:flex;gap:10px;margin-top:15px">
-            <button class="btn btn-gm" onclick="applyGM()">✅</button>
-            <button class="btn btn-draw" onclick="resetGM()">🔄</button>
-            <button class="btn btn-attack" onclick="closeGM()">✕</button>
-        </div>
-    </div>
+<div class="gmP" id="gmPanel">
+<h3 style="color:#667eea;margin-bottom:12px">⚙️ GM面板</h3>
+<div class="gmi">
+<label class="gml">💰 金幣</label>
+<input type="number" id="gmGold" value="500">
+</div>
+<div class="gmi">
+<label class="gml">❤️ HP</label>
+<input type="number" id="gmHp" value="100">
+</div>
+<div class="gmi">
+<label class="gml">⭐ 等級</label>
+<input type="number" id="gmLvl" value="1">
+</div>
+<div class="ctls">
+<button class="btn b3" onclick="applyGM()">✅</button>
+<button class="btn b1" onclick="resetGM()">🔄</button>
+<button class="btn b2" onclick="closeGM()">✕</button>
+</div>
+</div>
 
-    <script>
-        let game = {
-            gold: 500, level: 1, wins: 0,
-            playerHp: 100, playerMaxHp: 100, playerAtk: 10, playerDef: 5,
-            hand: [], boss: null, totalDraws: 0,
-            skillUses: 3, lastSkillReset: new Date().toDateString()
-        };
-        const MAX_HAND = 20;
-        const cardTemplates = [
-            {name:'小劍',icon:'🗡️',atk:5,def:0,rarity:'common'},
-            {name:'盾牌',icon:'🛡️',atk:0,def:5,rarity:'common'},
-            {name:'弓箭',icon:'🏹',atk:7,def:0,rarity:'common'},
-            {name:'魔法杖',icon:'🔮',atk:8,def:2,rarity:'common'},
-            {name:'火焰劍',icon:'🔥',atk:12,def:3,rarity:'rare'},
-            {name:'寒冰盾',icon:'❄️',atk:3,def:10,rarity:'rare'},
-            {name:'雷神之鎚',icon:'⚡',atk:18,def:5,rarity:'epic'},
-            {name:'龍鱗甲',icon:'🐉',atk:5,def:18,rarity:'epic'},
-            {name:'毀滅者',icon:'💀',atk:30,def:10,rarity:'legendary'},
-            {name:'天使守護',icon:'👼',atk:10,def:25,rarity:'legendary'}
-        ];
-        const shopItems = [
-            {name:'幸運符',icon:'🍀',cost:100,desc:'攻+5（永久）',type:'atk'},
-            {name:'生命護符',icon:'❤️‍🔥',cost:150,desc:'HP上限+20（永久）',type:'hp'},
-            {name:'神秘卡包',icon:'🎁',cost:300,desc:'隨機稀有卡',type:'card',rarity:'rare'},
-            {name:'傳說卡包',icon:'✨',cost:500,desc:'隨機史詩/傳說',type:'card',rarity:'epic'}
-        ];
-        const bossTemplates = [
-            {name:'哥布林',icon:'👺',hp:50,atk:8,reward:50},
-            {name:'狼人',icon:'🐺',hp:80,atk:12,reward:80},
-            {name:'巨魔',icon:'👹',hp:120,atk:15,reward:120},
-            {name:'暗龍',icon:'🐉',hp:200,atk:20,reward:200},
-            {name:'深淵領主',icon:'👿',hp:350,atk:25,reward:350},
-            {name:'虛空之王',icon:'💀',hp:500,atk:35,reward:500}
-        ];
+<script>
+var G={
+  gold:500,
+  lvl:1,
+  wins:0,
+  hp:100,
+  maxHp:100,
+  atk:10,
+  def:5,
+  hand:[],
+  boss:null,
+  totalDraws:0,
+  skillCount:3,
+  lastDaily:null,
+  lastAd:null
+};
+var MAX_HAND=20;
+var COST_SINGLE=50;
+var COST_TEN=500;
 
-        function getRandomCard() {
-            const lc = Math.min(0.05, game.totalDraws * 0.001);
-            const ec = Math.min(0.15, game.totalDraws * 0.003);
-            const rc = Math.min(0.30, game.totalDraws * 0.006);
-            const r = Math.random();
-            let pool;
-            if (r < lc) pool = cardTemplates.filter(c => c.rarity === 'legendary');
-            else if (r < lc + ec) pool = cardTemplates.filter(c => c.rarity === 'epic');
-            else if (r < lc + ec + rc) pool = cardTemplates.filter(c => c.rarity === 'rare');
-            else pool = cardTemplates.filter(c => c.rarity === 'common');
-            return {...pool[Math.floor(Math.random() * pool.length)]};
-        }
+var cardTpls=[
+  {name:'小劍',icon:'🗡️',atk:5,def:0,rar:'c'},
+  {name:'盾牌',icon:'🛡️',atk:0,def:5,rar:'c'},
+  {name:'弓箭',icon:'🏹',atk:7,def:0,rar:'c'},
+  {name:'魔法杖',icon:'🔮',atk:8,def:2,rar:'c'},
+  {name:'火焰劍',icon:'🔥',atk:12,def:3,rar:'r'},
+  {name:'寒冰盾',icon:'❄️',atk:3,def:10,rar:'r'},
+  {name:'雷神之鎚',icon:'⚡',atk:18,def:5,rar:'e'},
+  {name:'龍鱗甲',icon:'🐉',atk:5,def:18,rar:'e'},
+  {name:'毀滅者',icon:'💀',atk:30,def:10,rar:'l'},
+  {name:'天使守護',icon:'👼',atk:10,def:25,rar:'l'}
+];
+var shopItems=[
+  {name:'幸運符',icon:'🍀',cost:100,stat:'atk',val:5},
+  {name:'生命符',icon:'❤️‍🔥',cost:150,stat:'hp',val:20},
+  {name:'力量戒',icon:'💍',cost:200,stat:'atk',val:8},
+  {name:'守護戒',icon:'🛡️',cost:250,stat:'def',val:5}
+];
+var bossTpls=[
+  {name:'哥布林',icon:'👺',hp:50,atk:8,rw:50},
+  {name:'狼人',icon:'🐺',hp:80,atk:12,rw:80},
+  {name:'巨魔',icon:'👹',hp:120,atk:15,rw:120},
+  {name:'暗龍',icon:'🐉',hp:200,atk:20,rw:200},
+  {name:'深淵主',icon:'👿',hp:350,atk:25,rw:350},
+  {name:'虛空王',icon:'💀',hp:500,atk:35,rw:500}
+];
 
-        function drawCard() {
-            if (game.gold < 50) {addLog('⚠️ 需要50金幣','system');return;}
-            if (game.hand.length >= MAX_HAND) {addLog('⚠️ 背包已滿','system');return;}
-            game.gold -= 50; game.totalDraws++;
-            const c = getRandomCard(); c.id = Date.now(); game.hand.push(c);
-            addLog('🎴 '+c.icon+' '+c.name+' ATK'+c.atk+' DEF'+c.def,'card');
-            updateUI();
-        }
+function getRndCard(){
+  var t=G.totalDraws;
+  var lC=Math.min(0.05,t*0.001);
+  var eC=Math.min(0.15,t*0.003);
+  var rC=Math.min(0.30,t*0.006);
+  var r=Math.random();
+  var pool;
+  if(r<lC)pool=cardTpls.filter(function(c){return c.rar==='l'});
+  else if(r<lC+eC)pool=cardTpls.filter(function(c){return c.rar==='e'});
+  else if(r<lC+eC+rC)pool=cardTpls.filter(function(c){return c.rar==='r'});
+  else pool=cardTpls.filter(function(c){return c.rar==='c'});
+  return pool[Math.floor(Math.random()*pool.length)];
+}
 
-        function draw10() {
-            if (game.gold < 500) {addLog('⚠️ 10連需要500金幣','system');return;}
-            if (game.hand.length >= MAX_HAND) {addLog('⚠️ 空間不足','system');return;}
-            game.gold -= 500; game.totalDraws += 10;
-            addLog('🌟 10連抽！','card');
-            for (let i = 0; i < 10 && game.hand.length < MAX_HAND; i++) {
-                const c = getRandomCard(); c.id = Date.now()+i; game.hand.push(c);
-                addLog('  '+c.icon+c.name,'card');
-            }
-            updateUI();
-        }
+function drawCard(){
+  if(G.gold<COST_SINGLE){addLog('⚠️ 需要'+COST_SINGLE+'💰','sys');return}
+  if(G.hand.length>=MAX_HAND){addLog('⚠️ 背包滿了','');return}
+  G.gold-=COST_SINGLE;
+  G.totalDraws++;
+  var c=getRndCard();
+  c.id=Date.now();
+  G.hand.push(c);
+  var t=c.rar==='l'?'gold':c.rar==='e'?'card':c.rar==='r'?'hl':'card';
+  addLog('🎴'+c.icon+c.name+'⚔'+c.atk+'🛡'+c.def,t);
+  updateUI();
+}
 
-        function spawnBoss() {
-            if (game.boss) {addLog('⚠️ 已有Boss','system');return;}
-            const idx = Math.min(game.level-1, bossTemplates.length-1);
-            const t = bossTemplates[idx];
-            const s = 1 + (game.level-1)*0.3;
-            game.boss = {name:t.name,icon:t.icon,hp:Math.floor(t.hp*s),maxHp:Math.floor(t.hp*s),atk:Math.floor(t.atk*s),reward:Math.floor(t.reward*s)};
-            document.getElementById('bossArea').innerHTML = '<div class="boss-card"><div class="boss-icon">'+game.boss.icon+'</div><div class="boss-name">'+game.boss.name+'</div><div class="boss-hp-bar"><div class="boss-hp-fill" id="bossBar" style="width:100%"></div></div><div style="font-size:0.75rem">'+game.boss.hp+'/'+game.boss.maxHp+' ⚔'+game.boss.atk+'</div></div>';
-            addLog('👹 '+game.boss.icon+game.boss.name+' HP'+game.boss.hp+' ATK'+game.boss.atk,'damage');
-            updateUI();
-        }
+function draw10(){
+  if(G.gold<COST_TEN){addLog('⚠️ 10連需'+COST_TEN+'💰','sys');return}
+  if(G.hand.length>=MAX_HAND){addLog('⚠️ 空間不足','sys');return}
+  G.gold-=COST_TEN;
+  G.totalDraws+=10;
+  addLog('🌟10連抽！','gold');
+  for(var i=0;i<10&&G.hand.length<MAX_HAND;i++){
+    var c=getRndCard();
+    c.id=Date.now()+i;
+    G.hand.push(c);
+    addLog('  '+c.icon+c.name+' ⚔'+c.atk,t);
+  }
+  updateUI();
+}
 
-        function useAllCards() {
-            if (!game.boss) {addLog('⚠️ 先挑戰Boss','system');return;}
-            if (game.hand.length === 0) {addLog('⚠️ 先抽卡','system');return;}
-            let dmg = game.playerAtk;
-            game.hand.forEach(c => dmg += c.atk);
-            game.boss.hp -= dmg;
-            addLog('⚔️ 總攻 '+dmg+' 傷害！','damage');
-            game.hand = [];
-            if (game.boss.hp <= 0) winBoss(); else bossAttack();
-            updateUI();
-        }
+function spawnBoss(){
+  if(G.boss){addLog('⚠️ 已有Boss','sys');return}
+  var bi=Math.min(G.lvl-1,bossTpls.length-1);
+  var t=bossTpls[bi];
+  var sc=1+(G.lvl-1)*0.3;
+  G.boss={
+    name:t.name,
+    icon:t.icon,
+    hp:Math.floor(t.hp*sc),
+    maxHp:Math.floor(t.hp*sc),
+    atk:t.atk*sc),
+    rw:Math.floor(t.rw*sc)
+  };
+  var h=G.boss;
+  var bar='<div class="bossCard"><div class="bossHp">'+h.icon+'</div><div class="bossNm">'+h.name+'</div><div class="bossHpBar"><div class="bossHpF" id="bossHpF" style="width:100%"></div></div><div class="bossDmg">'+h.hp+'/'+h.maxHp+' ⚔'+Math.floor(h.atk)+'</div></div>';
+  document.getElementById('bossArea').innerHTML=bar;
+  addLog('👹 挑戰'+h.name+' HP'+h.hp+' ⚔'+Math.floor(h.atk),'dmg');
+  updateUI();
+}
 
-        function bossAttack() {
-            let d = Math.max(1, game.boss.atk - game.playerDef);
-            game.playerHp -= d;
-            addLog('👹 '+game.boss.name+' 反擊 '+d+'傷','damage');
-            updateUI();
-            if (game.playerHp <= 0) loseGame();
-        }
+function attackAll(){
+  if(!G.boss){addLog('⚠️ 先挑戰Boss','sys');return}
+  if(G.hand.length===0){addLog('⚠️ 先抽卡','sys');return}
+  var tot=G.atk;
+  var names=[];
+  for(var i=0;i<G.hand.length;i++){tot+=G.hand[i].atk;names.push(G.hand[i].icon+G.hand[i].name);}
+  G.boss.hp-=tot;
+  addLog('⚔️ '+names.join(' ')+'='+tot+'傷','dmg');
+  G.hand=[];
+  if(G.boss.hp<=0)winBoss();else bossAttack();
+  updateUI();
+}
 
-        function useSkill(type) {
-            if (game.skillUses <= 0) {addLog('⚠️ 今日技能已用完','system');return;}
-            if (!game.boss && type === 'fireball') {addLog('⚠️ 需要Boss才能用火焰彈','system');return;}
-            game.skillUses--;
-            if (type === 'fireball') {
-                let dmg = game.playerAtk * 2;
-                game.hand.forEach(c => dmg += c.atk * 2);
-                game.boss.hp -= dmg;
-                addLog('🔥 火焰彈！雙倍 '+dmg+' 傷害！','skill');
-                game.hand = [];
-                if (game.boss.hp <= 0) winBoss(); else bossAttack();
-            } else {
-                game.playerHp = Math.min(game.playerMaxHp, game.playerHp + 30);
-                addLog('💚 恢復 +30 HP','heal');
-            }
-            updateUI();
-        }
+function bossAttack(){
+  var df=0;
+  for(var i=0;i<G.hand.length;i++)df+=G.hand[i].def||0;
+  var dmg=Math.max(1,G.boss.atk-G.def-df);
+  G.hp-=dmg;
+  addLog('👹'+G.boss.name+'反擊'+dmg+'傷','dmg');
+  if(G.hp<=0)loseGame();
+  updateUI();
+}
 
-        function winBoss() {
-            game.gold += game.boss.reward; game.wins++;
-            if (game.wins % 3 === 0) game.level++;
-            game.playerHp = Math.min(game.playerMaxHp, game.playerHp + 30);
-            document.getElementById('winGold').textContent = '+'+game.boss.reward+' 💰';
-            document.getElementById('winOverlay').classList.add('show');
-            addLog('🏆 '+game.boss.name+'擊敗！+'+game.boss.reward+'金','gold');
-            game.boss = null;
-            document.getElementById('bossArea').innerHTML = '<div style="color:#8892b0">已驅逐</div>';
-            updateUI();
-        }
+function winBoss(){
+  G.gold+=G.boss.rw;
+  G.wins++;
+  if(G.wins%3===0)G.lvl++;
+  G.hp=Math.min(G.maxHp,G.hp+30);
+  document.getElementById('winReward').textContent='+'+G.boss.rw+'💰';
+  document.getElementById('winOverlay').classList.add('show');
+  addLog('🏆'+G.boss.name+'擊敗+'+G.boss.rw+'💰','gold');
+  G.boss=null;
+  document.getElementById('bossArea').innerHTML='<div style="color:#8892b0">已驅逐</div>';
+  updateUI();
+}
 
-        function loseGame() {
-            document.getElementById('loseOverlay').classList.add('show');
-            addLog('💀 失敗...','damage');
-        }
+function loseGame(){
+  document.getElementById('loseOverlay').classList.add('show');
+  addLog('💀 失敗...','dmg');
+}
 
-        function revive() {
-            game.playerHp = game.playerMaxHp; game.boss = null;
-            document.getElementById('loseOverlay').classList.remove('show');
-            document.getElementById('bossArea').innerHTML = '<div style="color:#8892b0">再挑戰！</div>';
-            updateUI();
-        }
+function revive(){
+  G.hp=G.maxHp;
+  G.boss=null;
+  document.getElementById('loseOverlay').classList.remove('show');
+  document.getElementById('bossArea').innerHTML='<div style="color:#8892b0">再來</div>';
+  updateUI();
+}
 
-        function closeWin() {
-            document.getElementById('winOverlay').classList.remove('show');
-            game.boss = null;
-            document.getElementById('bossArea').innerHTML = '<div style="color:#8892b0">挑戰下一個</div>';
-        }
+function closeWin(){
+  document.getElementById('winOverlay').classList.remove('show');
+  G.boss=null;
+  document.getElementById('bossArea').innerHTML='<div style="color:#8892b0">挑下一個</div>';
+}
 
-        function skipTurn() {
-            if (!game.boss) {addLog('⚠️ 無Boss','system');return;}
-            addLog('⏭️ 跳過攻擊','system');
-            bossAttack();
-        }
+function skipTurn(){
+  if(!G.boss){addLog('⚠️ 無Boss','sys');return}
+  addLog('⏭️跳過攻擊','sys');
+  bossAttack();
+}
 
-        function buyItem(idx) {
-            const it = shopItems[idx];
-            if (game.gold < it.cost) {addLog('⚠️ 金幣不足','system');return;}
-            game.gold -= it.cost;
-            if (it.type === 'atk') { game.playerAtk += 5; addLog('🍀 '+it.icon+it.name+' 攻+5','gold'); }
-            else if (it.type === 'hp') { game.playerMaxHp += 20; game.playerHp += 20; addLog('❤️‍🔥 '+it.icon+it.name+' HP+20','gold'); }
-            else {
-                const c = getRandomCard();
-                if (it.rarity === 'rare') c.rarity = 'rare';
-                else c.rarity = Math.random()<0.5?'epic':'legendary';
-                c.id = Date.now();
-                if (game.hand.length < MAX_HAND) { game.hand.push(c); addLog('🎁 '+c.icon+c.name+'！','gold'); }
-                else addLog('🎁 背包滿了！金幣不退','system');
-            }
-            updateUI();
-        }
+function claimDaily(){
+  var today=new Date().toDateString();
+  if(G.lastDaily===today){addLog('⚠️今日已領','sys');return}
+  G.gold+=100;
+  G.lastDaily=today;
+  addLog('🎁登入+100💰','gold');
+  updateUI();
+}
 
-        function updateUI() {
-            if (new Date().toDateString() !== game.lastSkillReset) { game.skillUses = 3; game.lastSkillReset = new Date().toDateString(); }
-            document.getElementById('gold').textContent = game.gold;
-            document.getElementById('level').textContent = game.level;
-            document.getElementById('wins').textContent = game.wins;
-            document.getElementById('playerHp').textContent = Math.max(0,game.playerHp);
-            document.getElementById('playerMaxHp').textContent = game.playerMaxHp;
-            document.getElementById('playerHpFill').style.width = (game.playerHp/game.playerMaxHp*100)+'%';
-            document.getElementById('handCount').textContent = game.hand.length;
-            document.getElementById('skillLeft').textContent = game.skillUses;
-            document.getElementById('skillCount').textContent = game.skillUses;
-            let h = game.hand.length===0?'<div style="color:#8892b0">尚未抽牌</div>':'';
-            game.hand.forEach(c => { h += '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.3);padding:3px 8px;border-radius:20px;margin:2px;font-size:0.7rem">'+c.icon+' '+c.name+' ⚔'+c.atk+'</span> '; });
-            document.getElementById('cardArea').innerHTML = h;
-            if (game.boss) { const b = document.getElementById('bossBar'); if(b) b.style.width = Math.max(0,game.boss.hp/game.boss.maxHp*100)+'%'; }
-            let s = '';
-            shopItems.forEach((it,i) => {
-                const dis = game.gold < it.cost ? 'disabled' : '';
-                s += '<div class="shop-item '+dis+'" onclick="buyItem('+i+')"><div class="shop-item-icon">'+it.icon+'</div><div class="shop-item-name">'+it.name+'</div><div class="shop-item-desc">'+it.desc+'</div><div class="shop-item-price">💰'+it.cost+'</div></div>';
-            });
-            document.getElementById('shopItems').innerHTML = s;
-        }
+function watchAd(){
+  var now=Date.now();
+  if(G.lastAd&&now-G.lastAd<600000){
+    var m=Math.ceil((600000-(now-G.lastAd))/60000;
+    addLog('⚠️'+m+'分鐘後再看','sys');
+    return;
+  }
+  G.gold+=50;
+  G.lastAd=now;
+  addLog('📺觀看+50💰','gold');
+  updateUI();
+}
 
-        function toggleSkills() { document.getElementById('skillsPanel').classList.toggle('show'); }
-        function toggleShop() { document.getElementById('shopPanel').classList.toggle('show'); }
-        function toggleGM() { document.getElementById('gmPanel').classList.toggle('show'); }
-        function closeGM() { document.getElementById('gmPanel').classList.remove('show'); }
-        function applyGM() {
-            game.gold = parseInt(document.getElementById('gmGold').value)||0;
-            game.playerHp = Math.min(parseInt(document.getElementById('gmHp').value)||100, game.playerMaxHp);
-            updateUI(); closeGM(); addLog('⚙️ GM已應用','system');
-        }
-        function resetGM() {
-            game.gold=500; game.level=1; game.wins=0; game.playerHp=100; game.playerMaxHp=100; game.playerAtk=10; game.playerDef=5; game.hand=[]; game.boss=null; game.skillUses=3;
-            updateUI(); addLog('🔄 GM已重置','system');
-        }
-        function addLog(msg,type) {
-            const l = document.getElementById('battleLog');
-            const e = document.createElement('div'); e.className='log-entry '+type; e.textContent=msg;
-            l.insertBefore(e, l.firstChild);
-        }
-        updateUI();
-    </script>
+function explore(d){
+  var mn,mx,lk=0.15;
+  if(d==='easy'){mn=20;mx=40;lk=0}
+  else if(d==='med'){mn=50;mx=100;lk=0.1}
+  else{mn=100;mx=200;lk=0.2}
+  var r=Math.floor(Math.random()*(mx-mn+1))+mn;
+  if(Math.random()<lk){
+    var loss=Math.floor(r*0.3);
+    G.gold-=loss;
+    addLog('🗺️失敗-'+loss+'💰','dmg');
+  }else{
+    G.gold+=r;
+    addLog('🗺️成功+'+r+'💰','gold');
+  }
+  document.getElementById('earnPnl').classList.remove('show');
+  updateUI();
+}
+
+function toggleShop(){
+  var p=document.getElementById('shopPnl');
+  p.classList.toggle('show');
+  if(p.classList.contains('show'))renderShop();
+}
+function renderShop(){
+  var h='';
+  for(var i=0;i<shopItems.length;i++){
+    var it=shopItems[i];
+    var dis=G.gold<it.cost;
+    h+='<div class="itm'+(dis?' itmDis':'')+'"'+(dis?'':' onclick="buyItem('+i+')">')+'<div><div style="font-size:1.5rem">'+it.icon+'</div><div style="font-weight:bold">'+it.name+'</div><div style="font-size:0.65rem;color:#8892b0">';
+    if(it.stat==='atk')h+='+'+it.val+'⚔';
+    else if(it.stat==='hp')h+='+'+it.val+'❤️';
+    else h+='+'+it.val+'🛡';
+    h+='</div></div><div style="color:#fee140;font-weight:bold">💰'+it.cost+'</div></div>';
+  }
+  document.getElementById('shopList').innerHTML=h;
+}
+function buyItem(i){
+  var it=shopItems[i];
+  if(G.gold<it.cost){addLog('⚠️金幣不足','sys');return}
+  G.gold-=it.cost;
+  if(it.stat==='atk')G.atk+=it.val;
+  else if(it.stat==='hp'){G.maxHp+=it.val;G.hp+=it.val;}
+  else if(it.stat==='def')G.def+=it.val;
+  addLog('🏪購買'+it.icon+it.name+' 成功','gold');
+  document.getElementById('shopPnl').classList.remove('show');
+  updateUI();
+}
+function toggleGM(){
+  document.getElementById('gmPanel').classList.toggle('show');
+}
+function closeGM(){document.getElementById('gmPanel').classList.remove('show');}
+function applyGM(){
+  G.gold=parseInt(document.getElementById('gmGold').value)||0;
+  G.hp=Math.min(parseInt(document.getElementById('gmHp').value)||100,G.maxHp);
+  G.lvl=parseInt(document.getElementById('gmLvl').value)||1;
+  closeGM();
+  addLog('⚙️ GM套用','sys');
+  updateUI();
+}
+function resetGM(){
+  G={gold:500,lvl:1,wins:0,hp:G.maxHp,maxHp:G.maxHp,atk:G.atk,def:G.def,hand:[],boss:null,totalDraws:G.totalDraws,skillCount:3,lastDaily:G.lastDaily,lastAd:G.lastAd};
+  document.getElementById('winOverlay').classList.remove('show');
+  document.getElementById('loseOverlay').classList.remove('show');
+  document.getElementById('bossArea').innerHTML='<div style="color:#8892b0">已重置</div>';
+  closeGM();
+  addLog('🔄重置','sys');
+  updateUI();
+}
+function toggleEarn(){document.getElementById('earnPnl').classList.toggle('show');}
+function addLog(msg,type){
+  var l=document.getElementById('logBox');
+  var e=document.createElement('div');
+  e.className='le '+(type||'sys');
+  e.textContent=msg;
+  l.insertBefore(e,l.firstChild);
+}
+function updateUI(){
+  document.getElementById('gold').textContent=G.gold;
+  document.getElementById('lvl').textContent=G.lvl;
+  document.getElementById('wins').textContent=G.wins;
+  document.getElementById('hp').textContent=Math.max(0,G.hp);
+  document.getElementById('maxHp').textContent=G.maxHp;
+  document.getElementById('hpBar').style.width=(G.hp/G.maxHp*100)+'%';
+  document.getElementById('handCount').textContent=G.hand.length;
+  document.getElementById('skillCount').textContent=G.skillCount;
+  var today=new Date().toDateString();
+  document.getElementById('dailyBtn').disabled=G.lastDaily===today;
+  var now=Date.now();
+  document.getElementById('adBtn').disabled=G.lastAd&&now-G.lastAd<600000;
+  var h=G.hand.length===0?'<div style="color:#8892b0">未抽</div>':'';
+  for(var i=0;i<G.hand.length;i++){
+    var c=G.hand[i];
+    h+='<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,0.3);padding:3px 8px;border-radius:20px;font-size:0.7rem;margin:2px">'+c.icon+c.name+'⚔'+c.atk+'</span> ';
+  }
+  document.getElementById('handArea').innerHTML=h;
+  if(G.boss){
+    var bHpF=document.getElementById('bossHpF');
+    if(bHpF)bHpF.style.width=Math.max(0,G.boss.hp/G.boss.maxHp*100)+'%';
+  }
+}
+updateUI();
+</script>
 </body>
 </html>
