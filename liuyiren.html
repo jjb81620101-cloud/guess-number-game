@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔮 小六壬占卜</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+  background: linear-gradient(160deg, #0d0d1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 30px 16px 60px;
+  color: #fff;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  font-weight: 900;
+  background: linear-gradient(90deg, #FFD700, #FF8C00, #FFD700);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-align: center; margin-bottom: 6px;
+  filter: drop-shadow(0 0 12px rgba(255,215,0,0.4));
+}
+.sub {
+  font-size: 0.88rem; color: #8892b0; text-align: center; margin-bottom: 32px;
+  letter-spacing: 2px;
+}
+
+.card {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(14px);
+  border-radius: 24px;
+  padding: 28px 24px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  width: 100%; max-width: 400px;
+  margin-bottom: 18px;
+}
+
+/* Input section */
+.input-label {
+  font-size: 0.8rem; color: #8892b0; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px;
+}
+.num-row {
+  display: flex; gap: 12px; justify-content: center; margin-bottom: 18px;
+}
+.num-box {
+  flex: 1; max-width: 90px;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 14px; padding: 12px 8px;
+  text-align: center; font-size: 2rem; font-weight: 900;
+  color: #FFD700; outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.num-box:focus { border-color: #FFD700; box-shadow: 0 0 0 3px rgba(255,215,0,0.15); }
+.num-box::placeholder { color: #445; font-size: 1.2rem; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.btn-row { display: flex; gap: 10px; }
+.btn {
+  flex: 1; border: none; border-radius: 50px; padding: 14px 10px;
+  font-size: 1rem; font-weight: 900; cursor: pointer; font-family: inherit;
+  transition: all 0.2s; letter-spacing: 1px;
+}
+.btn-random {
+  background: linear-gradient(135deg, #7C3AED, #A78BFA);
+  color: #fff; box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+}
+.btn-random:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(124,58,237,0.5); }
+.btn-go {
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  color: #1a1a1a; box-shadow: 0 6px 20px rgba(255,165,0,0.4);
+}
+.btn-go:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,165,0,0.5); }
+
+/* Result */
+.result-card {
+  display: none;
+  background: rgba(255,255,255,0.05);
+  border-radius: 24px;
+  padding: 30px 24px;
+  border: 1px solid rgba(255,215,0,0.2);
+  box-shadow: 0 0 40px rgba(255,215,0,0.08);
+  width: 100%; max-width: 400px;
+  text-align: center;
+  animation: fadeUp 0.5s ease;
+}
+.result-card.show { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+.calc-line {
+  font-size: 0.85rem; color: #8892b0; margin-bottom: 18px; line-height: 1.8;
+}
+.calc-line span { color: #ccd6f6; font-weight: 700; }
+
+.oracle-name {
+  font-size: clamp(3rem, 15vw, 5rem); font-weight: 900;
+  line-height: 1.1; margin-bottom: 12px;
+  filter: drop-shadow(0 0 20px currentColor);
+}
+.oracle-badge {
+  display: inline-block; font-size: 0.8rem; font-weight: 900;
+  padding: 5px 16px; border-radius: 50px; margin-bottom: 18px;
+  letter-spacing: 2px;
+}
+.oracle-meaning {
+  font-size: 1rem; color: #ccd6f6; line-height: 1.8;
+  background: rgba(255,255,255,0.05); border-radius: 14px;
+  padding: 14px 18px; text-align: left;
+}
+.oracle-meaning b { color: #FFD700; }
+
+/* Each oracle color */
+.da-an    { color: #00E676; } .badge-da-an    { background:rgba(0,230,118,0.15); color:#00E676; border:1px solid rgba(0,230,118,0.3); }
+.liu-lian { color: #90A4AE; } .badge-liu-lian { background:rgba(144,164,174,0.15); color:#90A4AE; border:1px solid rgba(144,164,174,0.3); }
+.su-xi    { color: #FFD700; } .badge-su-xi    { background:rgba(255,215,0,0.15); color:#FFD700; border:1px solid rgba(255,215,0,0.3); }
+.chi-kou  { color: #FF5252; } .badge-chi-kou  { background:rgba(255,82,82,0.15); color:#FF5252; border:1px solid rgba(255,82,82,0.3); }
+.xiao-ji  { color: #40C4FF; } .badge-xiao-ji  { background:rgba(64,196,255,0.15); color:#40C4FF; border:1px solid rgba(64,196,255,0.3); }
+.kong-wang{ color: #CE93D8; } .badge-kong-wang{ background:rgba(206,147,216,0.15); color:#CE93D8; border:1px solid rgba(206,147,216,0.3); }
+
+.dice-row {
+  display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;
+}
+.dice {
+  width: 56px; height: 56px; border-radius: 12px;
+  background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; font-weight: 900; color: #FFD700;
+}
+</style>
+</head>
+<body>
+
+<h1>🔮 小六壬占卜</h1>
+<div class="sub">大安 · 留連 · 速喜 · 赤口 · 小吉 · 空亡</div>
+
+<div class="card">
+  <div class="input-label">📋 填入三個數字（1–99）或隨機產出</div>
+  <div class="num-row">
+    <input class="num-box" id="n1" type="number" min="1" max="99" placeholder="?">
+    <input class="num-box" id="n2" type="number" min="1" max="99" placeholder="?">
+    <input class="num-box" id="n3" type="number" min="1" max="99" placeholder="?">
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-random" onclick="randomNums()">🎲 隨機</button>
+    <button class="btn btn-go" onclick="divinate()">✨ 起卦</button>
+  </div>
+</div>
+
+<div class="result-card" id="result-card">
+  <div class="dice-row" id="dice-row"></div>
+  <div class="calc-line" id="calc-line"></div>
+  <div class="oracle-name" id="oracle-name"></div>
+  <div class="oracle-badge" id="oracle-badge"></div>
+  <div class="oracle-meaning" id="oracle-meaning"></div>
+</div>
+
+<script>
+const ORACLES = [
+  {
+    name: '大安',
+    cls: 'da-an', badge: 'badge-da-an',
+    type: '大吉',
+    meaning: '<b>大安</b>：安穩如山，萬事吉祥。<br>所求之事順利，家宅平安，出行無礙，病者漸癒。宜靜守，忌輕舉妄動。',
+  },
+  {
+    name: '留連',
+    cls: 'liu-lian', badge: 'badge-liu-lian',
+    type: '小凶',
+    meaning: '<b>留連</b>：事情遲延，難以即成。<br>謀事宜耐心等待，勿急於求成。失物難尋，出行有阻，望事漸成。',
+  },
+  {
+    name: '速喜',
+    cls: 'su-xi', badge: 'badge-su-xi',
+    type: '大吉',
+    meaning: '<b>速喜</b>：喜事將至，快速成就。<br>所求之事即可實現，有好消息到來，求財有望，婚事喜慶。',
+  },
+  {
+    name: '赤口',
+    cls: 'chi-kou', badge: 'badge-chi-kou',
+    type: '大凶',
+    meaning: '<b>赤口</b>：口舌是非，防爭訟。<br>諸事不順，易有爭執糾紛。宜靜不宜動，謀事難成，出行不利。',
+  },
+  {
+    name: '小吉',
+    cls: 'xiao-ji', badge: 'badge-xiao-ji',
+    type: '小吉',
+    meaning: '<b>小吉</b>：小有吉利，事漸順遂。<br>謀事可成，但需時日。出行吉，求財小有所獲，宜積極進取。',
+  },
+  {
+    name: '空亡',
+    cls: 'kong-wang', badge: 'badge-kong-wang',
+    type: '大凶',
+    meaning: '<b>空亡</b>：落空無果，諸事不成。<br>所求之事難以實現，宜靜待時機，勿強求。守舊為宜，切忌冒進。',
+  },
+];
+
+function randomNums() {
+  document.getElementById('n1').value = Math.floor(Math.random() * 99) + 1;
+  document.getElementById('n2').value = Math.floor(Math.random() * 99) + 1;
+  document.getElementById('n3').value = Math.floor(Math.random() * 99) + 1;
+}
+
+function divinate() {
+  const a = parseInt(document.getElementById('n1').value);
+  const b = parseInt(document.getElementById('n2').value);
+  const c = parseInt(document.getElementById('n3').value);
+
+  if (!a || !b || !c || a < 1 || a > 99 || b < 1 || b > 99 || c < 1 || c > 99) {
+    alert('請填入三個 1–99 的數字，或按「隨機」產出！');
+    return;
+  }
+
+  const sum = a + b + c;
+  const remainder = (sum - 2) % 6; // 0–5
+  const oracle = ORACLES[remainder];
+
+  // Dice display
+  const diceRow = document.getElementById('dice-row');
+  diceRow.innerHTML = [a, b, c].map(n => `<div class="dice">${n}</div>`).join('');
+
+  // Calc
+  document.getElementById('calc-line').innerHTML =
+    `(<span>${a}</span> + <span>${b}</span> + <span>${c}</span> − 2) ÷ 6<br>= <span>${sum - 2}</span> ÷ 6，餘數 <span>${remainder === 0 ? 0 : remainder}</span>`;
+
+  // Oracle
+  document.getElementById('oracle-name').className = 'oracle-name ' + oracle.cls;
+  document.getElementById('oracle-name').textContent = oracle.name;
+  document.getElementById('oracle-badge').className = 'oracle-badge ' + oracle.badge;
+  document.getElementById('oracle-badge').textContent = oracle.type;
+  document.getElementById('oracle-meaning').innerHTML = oracle.meaning;
+
+  const card = document.getElementById('result-card');
+  card.classList.remove('show');
+  void card.offsetWidth;
+  card.classList.add('show');
+}
+</script>
+</body>
+</html>
