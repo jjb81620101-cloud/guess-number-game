@@ -3,330 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onyx vs OpenClaw 比較</title>
+    <title>Onyx vs OpenClaw 比較 2026</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px 16px 48px;
             color: #fff;
         }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1000px; margin: 0 auto; }
+
         h1 {
             text-align: center;
-            font-size: 2rem;
-            margin-bottom: 30px;
+            font-size: clamp(1.4rem, 5vw, 2rem);
+            margin-bottom: 6px;
             background: linear-gradient(90deg, #00d9ff, #00ff88);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-        .table-wrapper {
-            overflow-x: auto;
+        .updated-badge {
+            text-align: center; font-size: 0.78rem; color: #8892b0;
+            margin-bottom: 24px; letter-spacing: 1px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
-            overflow: hidden;
+
+        /* Stats row */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 12px; margin-bottom: 24px;
         }
-        th, td {
-            padding: 16px 20px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        .stat-card {
+            background: rgba(255,255,255,0.07); border-radius: 14px;
+            padding: 16px 12px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        th {
-            background: rgba(255,255,255,0.1);
-            font-weight: 600;
-            color: #00d9ff;
-            font-size: 1.1rem;
+        .stat-val { font-size: 1.5rem; font-weight: 900; color: #00d9ff; }
+        .stat-label { font-size: 0.72rem; color: #8892b0; margin-top: 4px; }
+
+        /* Table */
+        .table-wrapper { overflow-x: auto; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.04); border-radius: 16px; overflow: hidden; }
+        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.92rem; }
+        th { background: rgba(255,255,255,0.1); font-weight: 700; color: #00d9ff; }
+        th:first-child { color: #fff; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.03); }
+
+        .check  { color: #00ff88; }
+        .cross  { color: #ff6b6b; }
+        .partial { color: #fee140; font-size: 0.85rem; }
+        .new-badge {
+            display: inline-block; font-size: 0.62rem; background: rgba(255,107,107,0.25);
+            color: #ff8080; border: 1px solid rgba(255,107,107,0.4);
+            padding: 1px 6px; border-radius: 4px; margin-left: 4px; vertical-align: middle;
         }
-        th:first-child {
-            color: #fff;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        tr:hover {
-            background: rgba(255,255,255,0.05);
-        }
-        .check { color: #00ff88; font-size: 1.2rem; }
-        .cross { color: #ff6b6b; font-size: 1.2rem; }
-        .partial { color: #fee140; font-size: 0.9rem; }
-        .onyx-col { background: rgba(102, 126, 234, 0.1); }
-        .openclaw-col { background: rgba(0, 217, 255, 0.1); }
+
+        .onyx-col    { background: rgba(102,126,234,0.08); }
+        .openclaw-col{ background: rgba(0,217,255,0.08); }
+
         .feature-category {
-            background: rgba(255,255,255,0.15);
-            font-weight: bold;
-            color: #a855f7;
+            background: rgba(255,255,255,0.12) !important;
+            font-weight: 800; color: #a855f7; font-size: 0.82rem;
+            letter-spacing: 0.5px; text-transform: uppercase;
         }
-        .winner {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            margin-left: 10px;
+
+        .winner { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.72rem; margin-left: 6px; font-weight: 700; }
+        .winner-onyx     { background: rgba(102,126,234,0.3); color: #a78bfa; }
+        .winner-openclaw { background: rgba(0,217,255,0.3);   color: #00d9ff; }
+        .winner-both     { background: rgba(0,255,136,0.3);   color: #00ff88; }
+
+        /* Cards */
+        .cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+        .summary-card {
+            background: rgba(255,255,255,0.06); border-radius: 16px;
+            padding: 20px; border: 1px solid rgba(255,255,255,0.1);
         }
-        .winner-onyx { background: rgba(102, 126, 234, 0.3); color: #a855f7; }
-        .winner-openclaw { background: rgba(0, 217, 255, 0.3); color: #00d9ff; }
-        .winner-both { background: rgba(0, 255, 136, 0.3); color: #00ff88; }
-        .winner-none { background: rgba(255, 107, 107, 0.3); color: #ff6b6b; }
-        .summary {
-            margin-top: 30px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 25px;
-        }
-        .summary h2 {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: #00d9ff;
-        }
-        .summary-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 12px;
-        }
-        .summary-icon {
-            font-size: 1.5rem;
-        }
-        .summary-text strong {
-            color: #00d9ff;
-        }
+        .summary-card h3 { font-size: 0.9rem; margin-bottom: 12px; }
+        .summary-card h3.onyx-h   { color: #a78bfa; }
+        .summary-card h3.claw-h   { color: #00d9ff; }
+        .summary-card ul { list-style: none; }
+        .summary-card li { font-size: 0.83rem; color: #ccd6f6; padding: 4px 0; }
+        .summary-card li::before { content: '▸ '; color: #8892b0; }
+
+        /* Recommend */
         .recommend {
-            margin-top: 20px;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 255, 136, 0.2));
-            border-radius: 12px;
-            border: 1px solid rgba(0, 217, 255, 0.3);
+            background: linear-gradient(135deg, rgba(0,217,255,0.12), rgba(0,255,136,0.12));
+            border-radius: 16px; padding: 22px;
+            border: 1px solid rgba(0,217,255,0.25); margin-bottom: 20px;
         }
-        .recommend h3 {
-            color: #00ff88;
-            margin-bottom: 10px;
+        .recommend h3 { color: #00ff88; margin-bottom: 14px; font-size: 1rem; }
+        .rec-item { margin-bottom: 10px; font-size: 0.88rem; color: #ccd6f6; }
+        .rec-item strong { color: #fff; }
+
+        /* New 2026 box */
+        .news-box {
+            background: rgba(255,107,107,0.08); border-radius: 16px;
+            padding: 18px; border: 1px solid rgba(255,107,107,0.2);
         }
-        @media (max-width: 768px) {
-            h1 { font-size: 1.5rem; }
-            th, td { padding: 12px 10px; font-size: 0.9rem; }
+        .news-box h3 { color: #ff8080; font-size: 0.9rem; margin-bottom: 12px; }
+        .news-item { font-size: 0.83rem; color: #ccd6f6; margin-bottom: 8px; padding-left: 8px; border-left: 2px solid #ff6b6b; }
+        .news-item b { color: #fff; }
+
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: repeat(3, 1fr); }
+            .cards-row { grid-template-columns: 1fr; }
+            th, td { padding: 10px 10px; font-size: 0.82rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>⚔️ Onyx vs OpenClaw 比較表</h1>
-        
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>功能</th>
-                        <th class="onyx-col">Onyx</th>
-                        <th class="openclaw-col">OpenClaw</th>
-                        <th>勝者</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="feature-category" colspan="4">📌 定位</td>
-                    </tr>
-                    <tr>
-                        <td>定位</td>
-                        <td class="onyx-col">AI Chat UI</td>
-                        <td class="openclaw-col">Agent 平台</td>
-                        <td>—</td>
-                    </tr>
-                    <tr>
-                        <td>開源</td>
-                        <td class="onyx-col">✅ MIT</td>
-                        <td class="openclaw-col">✅ MIT</td>
-                        <td><span class="winner winner-both"> both</span></td>
-                    </tr>
-                    <tr>
-                        <td class="feature-category" colspan="4">🤖 Agents</td>
-                    </tr>
-                    <tr>
-                        <td>自訂 Agents</td>
-                        <td class="onyx-col"><span class="check">✅</span></td>
-                        <td class="openclaw-col"><span class="check">✅</span></td>
-                        <td><span class="winner winner-both"> both</span></td>
-                    </tr>
-                    <tr>
-                        <td>多 Agent 協調</td>
-                        <td class="onyx-col"><span class="cross">❌</span></td>
-                        <td class="openclaw-col"><span class="check">✅ GSwitch</span></td>
-                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
-                    </tr>
-                    <tr>
-                        <td class="feature-category" colspan="4">🌐 搜尋與爬蟲</td>
-                    </tr>
-                    <tr>
-                        <td>Web Search</td>
-                        <td class="onyx-col"><span class="check">✅ 4種引擎</span></td>
-                        <td class="openclaw-col"><span class="partial">⚠️ 一般</span></td>
-                        <td><span class="winner winner-onyx"> Onyx</span></td>
-                    </tr>
-                    <tr>
-                        <td>Web Scraping</td>
-                        <td class="onyx-col"><span class="check">✅ Firecrawl</span></td>
-                        <td class="openclaw-col"><span class="partial">⚠️ 有限</span></td>
-                        <td><span class="winner winner-onyx"> Onyx</span></td>
-                    </tr>
-                    <tr>
-                        <td>瀏覽器控制</td>
-                        <td class="onyx-col"><span class="cross">❌</span></td>
-                        <td class="openclaw-col"><span class="check">✅ bb-browser</span></td>
-                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
-                    </tr>
-                    <tr>
-                        <td class="feature-category" colspan="4">📚 知識庫 RAG</td>
-                    </tr>
-                    <tr>
-                        <td>RAG</td>
-                        <td class="onyx-col"><span class="check">✅ 強</span></td>
-                        <td class="openclaw-col"><span class="partial">⚠️ 需設定</span></td>
-                        <td><span class="winner winner-onyx"> Onyx</span></td>
-                    </tr>
-                    <tr>
-                        <td>Connectors</td>
-                        <td class="onyx-col"><span class="check">✅ 40+</span></td>
-                        <td class="openclaw-col"><span class="partial">⚠️ MCP</span></td>
-                        <td><span class="winner winner-onyx"> Onyx</span></td>
-                    </tr>
-                    <tr>
-                        <td>Deep Research</td>
-                        <td class="onyx-col"><span class="check">✅</span></td>
-                        <td class="openclaw-col"><span class="cross">❌</span></td>
-                        <td><span class="winner winner-onyx"> Onyx</span></td>
-                    </tr>
-                    <tr>
-                        <td class="feature-category" colspan="4">💬 平台整合</td>
-                    </tr>
-                    <tr>
-                        <td>Telegram</td>
-                        <td class="onyx-col"><span class="cross">❌</span></td>
-                        <td class="openclaw-col"><span class="check">✅</span></td>
-                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
-                    </tr>
-                    <tr>
-                        <td>Discord</td>
-                        <td class="onyx-col"><span class="cross">❌</span></td>
-                        <td class="openclaw-col"><span class="check">✅</span></td>
-                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
-                    </tr>
-                    <tr>
-                        <td>WhatsApp</td>
-                        <td class="onyx-col"><span class="cross">❌</span></td>
-                        <td class="openclaw-col"><span class="check">✅</span></td>
-                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
-                    </tr>
-                    <tr>
-                        <td>Slack</td>
-                        <td class="onyx-col"><span class="cross">❌</span></td>
-                        <td class="openclaw-col"><span class="check">✅</span></td>
-                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
-                    </tr>
-                    <tr>
-                        <td class="feature-category" colspan="4">⏰ 自動化</td>
-                    </tr>
-                    <tr>
-                        <td>排程任務（Cron）</td>
-                        <td class="onyx-col"><span class="cross">❌</span></td>
-                        <td class="openclaw-col"><span class="check">✅</span></td>
-                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
-                    </tr>
-                    <tr>
-                        <td>心跳檢查（Heartbeat）</td>
-                        <td class="onyx-col"><span class="cross">❌</span></td>
-                        <td class="openclaw-col"><span class="check">✅</span></td>
-                        <td><span class="winner winner-openclaw"> OpenClaw</span></td>
-                    </tr>
-                    <tr>
-                        <td>MCP</td>
-                        <td class="onyx-col"><span class="check">✅</span></td>
-                        <td class="openclaw-col"><span class="check">✅</span></td>
-                        <td><span class="winner winner-both"> both</span></td>
-                    </tr>
-                    <tr>
-                        <td class="feature-category" colspan="4">💻 開發者</td>
-                    </tr>
-                    <tr>
-                        <td>安裝方式</td>
-                        <td class="onyx-col">Docker / 一鍵</td>
-                        <td class="openclaw-col">Docker</td>
-                        <td>—</td>
-                    </tr>
-                    <tr>
-                        <td>Code Interpreter</td>
-                        <td class="onyx-col"><span class="check">✅</span></td>
-                        <td class="openclaw-col"><span class="cross">❌</span></td>
-                        <td><span class="winner winner-onyx"> Onyx</span></td>
-                    </tr>
-                    <tr>
-                        <td>圖像生成</td>
-                        <td class="onyx-col"><span class="check">✅</span></td>
-                        <td class="openclaw-col"><span class="cross">❌</span></td>
-                        <td><span class="winner winner-onyx"> Onyx</span></td>
-                    </tr>
-                    <tr>
-                        <td class="feature-category" colspan="4">🏢 企業功能</td>
-                    </tr>
-                    <tr>
-                        <td>SSO</td>
-                        <td class="onyx-col"><span class="check">✅</span></td>
-                        <td class="openclaw-col"><span class="cross">❌</span></td>
-                        <td><span class="winner winner-onyx"> Onyx</span></td>
-                    </tr>
-                    <tr>
-                        <td>RBAC</td>
-                        <td class="onyx-col"><span class="check">✅</span></td>
-                        <td class="openclaw-col"><span class="partial">⚠️ 有限</span></td>
-                        <td><span class="winner winner-onyx"> Onyx</span></td>
-                    </tr>
-                    <tr>
-                        <td class="feature-category" colspan="4">💰 價格</td>
-                    </tr>
-                    <tr>
-                        <td>價格</td>
-                        <td class="onyx-col">免費開源</td>
-                        <td class="openclaw-col">免費 + 雲端版</td>
-                        <td>—</td>
-                    </tr>
-                </tbody>
-            </table>
+<div class="container">
+
+    <h1>⚔️ Onyx vs OpenClaw 比較表</h1>
+    <div class="updated-badge">最後更新：2026年3月 ｜ OpenClaw 最新版本</div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-val">100K+</div>
+            <div class="stat-label">OpenClaw GitHub Stars</div>
         </div>
-
-        <div class="summary">
-            <h2>📊 總結</h2>
-            
-            <div class="summary-item">
-                <div class="summary-icon">🏆</div>
-                <div class="summary-text">
-                    <strong>Onyx 勝出：</strong>搜尋爬蟲、RAG知識庫、Deep Research、Code Interpreter、圖像生成、企業SSO
-                </div>
-            </div>
-            
-            <div class="summary-item">
-                <div class="summary-icon">🏆</div>
-                <div class="summary-text">
-                    <strong>OpenClaw 勝出：</strong>多 Agent 協調（GSwitch）、平台整合（Telegram/Discord/WhatsApp）、排程自動化、瀏覽器控制
-                </div>
-            </div>
-
-            <div class="recommend">
-                <h3>🎯 建議</h3>
-                <p><strong>選 OpenClaw：</strong>需要多平台整合、自動化排程、多 Agent 協作（已有 GSwitch）</p>
-                <p style="margin-top:10px;"><strong>選 Onyx：</strong>只需要網頁 Chat UI、需要很強的 RAG（企業知識庫）、需要 Deep Research</p>
-            </div>
+        <div class="stat-card">
+            <div class="stat-val">13,729</div>
+            <div class="stat-label">ClawHub 社群 Skills</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val">100+</div>
+            <div class="stat-label">內建 Skills</div>
         </div>
     </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>功能</th>
+                    <th class="onyx-col">Onyx</th>
+                    <th class="openclaw-col">OpenClaw</th>
+                    <th>勝者</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="feature-category" colspan="4">📌 定位</td></tr>
+                <tr>
+                    <td>定位</td>
+                    <td class="onyx-col">AI Chat UI + RAG</td>
+                    <td class="openclaw-col">自主 Agent 平台</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td>開源授權</td>
+                    <td class="onyx-col"><span class="check">✅</span> MIT</td>
+                    <td class="openclaw-col"><span class="check">✅</span> MIT（開源基金會）</td>
+                    <td><span class="winner winner-both">both</span></td>
+                </tr>
+                <tr>
+                    <td>GitHub Stars</td>
+                    <td class="onyx-col">~20K</td>
+                    <td class="openclaw-col"><b>100K+</b> 🔥</td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+
+                <tr><td class="feature-category" colspan="4">🤖 Agent 能力</td></tr>
+                <tr>
+                    <td>自訂 Agents</td>
+                    <td class="onyx-col"><span class="check">✅</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span></td>
+                    <td><span class="winner winner-both">both</span></td>
+                </tr>
+                <tr>
+                    <td>多 Agent 協調</td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span> GSwitch</td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+                <tr>
+                    <td>Skills 系統</td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span> 100+ 內建 + 13K+ 社群</td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+                <tr>
+                    <td>自主執行任務</td>
+                    <td class="onyx-col"><span class="partial">⚠️ 有限</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span> 完全自主</td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+
+                <tr><td class="feature-category" colspan="4">🌐 搜尋與爬蟲</td></tr>
+                <tr>
+                    <td>Web Search</td>
+                    <td class="onyx-col"><span class="check">✅</span> 4種引擎</td>
+                    <td class="openclaw-col"><span class="check">✅</span></td>
+                    <td><span class="winner winner-onyx">Onyx</span></td>
+                </tr>
+                <tr>
+                    <td>Web Scraping</td>
+                    <td class="onyx-col"><span class="check">✅</span> Firecrawl</td>
+                    <td class="openclaw-col"><span class="partial">⚠️ 有限</span></td>
+                    <td><span class="winner winner-onyx">Onyx</span></td>
+                </tr>
+                <tr>
+                    <td>瀏覽器控制</td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span> Chromium（填表、截圖、點擊）</td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+
+                <tr><td class="feature-category" colspan="4">📚 知識庫 RAG</td></tr>
+                <tr>
+                    <td>RAG</td>
+                    <td class="onyx-col"><span class="check">✅</span> 強</td>
+                    <td class="openclaw-col"><span class="partial">⚠️ 需設定</span></td>
+                    <td><span class="winner winner-onyx">Onyx</span></td>
+                </tr>
+                <tr>
+                    <td>Connectors</td>
+                    <td class="onyx-col"><span class="check">✅</span> 40+</td>
+                    <td class="openclaw-col"><span class="check">✅</span> MCP + Skills</td>
+                    <td><span class="winner winner-onyx">Onyx</span></td>
+                </tr>
+                <tr>
+                    <td>Deep Research</td>
+                    <td class="onyx-col"><span class="check">✅</span></td>
+                    <td class="openclaw-col"><span class="cross">❌</span></td>
+                    <td><span class="winner winner-onyx">Onyx</span></td>
+                </tr>
+
+                <tr><td class="feature-category" colspan="4">💬 平台整合</td></tr>
+                <tr>
+                    <td>Telegram</td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span></td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+                <tr>
+                    <td>Discord</td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span></td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+                <tr>
+                    <td>WhatsApp / Signal</td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span></td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+                <tr>
+                    <td>Slack</td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span></td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+
+                <tr><td class="feature-category" colspan="4">⏰ 自動化</td></tr>
+                <tr>
+                    <td>排程任務（Cron）</td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span></td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+                <tr>
+                    <td>Heartbeat 監控</td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span></td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+                <tr>
+                    <td>MCP</td>
+                    <td class="onyx-col"><span class="check">✅</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span></td>
+                    <td><span class="winner winner-both">both</span></td>
+                </tr>
+
+                <tr><td class="feature-category" colspan="4">💻 開發者工具</td></tr>
+                <tr>
+                    <td>Code Interpreter</td>
+                    <td class="onyx-col"><span class="check">✅</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span> Python / JS / Bash <span class="new-badge">更新</span></td>
+                    <td><span class="winner winner-both">both</span></td>
+                </tr>
+                <tr>
+                    <td>圖像生成</td>
+                    <td class="onyx-col"><span class="check">✅</span></td>
+                    <td class="openclaw-col"><span class="cross">❌</span></td>
+                    <td><span class="winner winner-onyx">Onyx</span></td>
+                </tr>
+                <tr>
+                    <td>安裝方式</td>
+                    <td class="onyx-col">Docker / 一鍵</td>
+                    <td class="openclaw-col">Docker / npm</td>
+                    <td>—</td>
+                </tr>
+
+                <tr><td class="feature-category" colspan="4">🔒 安全性</td></tr>
+                <tr>
+                    <td>企業 SSO</td>
+                    <td class="onyx-col"><span class="check">✅</span></td>
+                    <td class="openclaw-col"><span class="cross">❌</span></td>
+                    <td><span class="winner winner-onyx">Onyx</span></td>
+                </tr>
+                <tr>
+                    <td>RBAC</td>
+                    <td class="onyx-col"><span class="check">✅</span></td>
+                    <td class="openclaw-col"><span class="partial">⚠️ 有限</span></td>
+                    <td><span class="winner winner-onyx">Onyx</span></td>
+                </tr>
+                <tr>
+                    <td>NemoClaw 沙盒安全 <span class="new-badge">NEW</span></td>
+                    <td class="onyx-col"><span class="cross">❌</span></td>
+                    <td class="openclaw-col"><span class="check">✅</span> NVIDIA OpenShell</td>
+                    <td><span class="winner winner-openclaw">OpenClaw</span></td>
+                </tr>
+
+                <tr><td class="feature-category" colspan="4">💰 價格</td></tr>
+                <tr>
+                    <td>費用</td>
+                    <td class="onyx-col">免費開源</td>
+                    <td class="openclaw-col">免費 + 雲端版</td>
+                    <td>—</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="cards-row">
+        <div class="summary-card">
+            <h3 class="onyx-h">🏆 Onyx 勝出項目</h3>
+            <ul>
+                <li>Web Search（4種引擎）</li>
+                <li>Firecrawl 爬蟲</li>
+                <li>RAG 知識庫（超強）</li>
+                <li>40+ Connectors</li>
+                <li>Deep Research</li>
+                <li>圖像生成</li>
+                <li>企業 SSO / RBAC</li>
+            </ul>
+        </div>
+        <div class="summary-card">
+            <h3 class="claw-h">🏆 OpenClaw 勝出項目</h3>
+            <ul>
+                <li>多 Agent 協調（GSwitch）</li>
+                <li>Skills 系統（13K+ 社群）</li>
+                <li>完全自主執行任務</li>
+                <li>Chromium 瀏覽器控制</li>
+                <li>Telegram / Discord / WhatsApp</li>
+                <li>排程自動化（Cron）</li>
+                <li>NemoClaw 安全沙盒（NVIDIA）</li>
+                <li>Code 執行（Python/JS/Bash）</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="recommend">
+        <h3>🎯 建議</h3>
+        <div class="rec-item"><strong>選 OpenClaw：</strong>需要多平台整合、自動化排程、多 Agent 協作、自主執行任務、瀏覽器操控</div>
+        <div class="rec-item"><strong>選 Onyx：</strong>需要超強 RAG 企業知識庫、Deep Research、圖像生成、SSO 企業安全</div>
+        <div class="rec-item"><strong>兩個都用：</strong>Onyx 做內部知識庫 + OpenClaw 做對外平台自動化</div>
+    </div>
+
+    <div class="news-box">
+        <h3>📰 OpenClaw 2026 最新動態</h3>
+        <div class="news-item"><b>2026年3月16日</b>：NVIDIA 發布 NemoClaw — OpenClaw 專屬安全沙盒（OpenShell 容器隔離）</div>
+        <div class="news-item"><b>2026年2月</b>：GitHub Stars 突破 100,000 🔥，ClawHub 社群 Skills 達 13,729 個</div>
+        <div class="news-item"><b>2026年2月14日</b>：創辦人宣布加入 OpenAI，專案移至開源基金會繼續維護</div>
+        <div class="news-item"><b>2026年1月</b>：由 Moltbot 更名為 OpenClaw；原名 Clawdbot（2025年11月發布）</div>
+    </div>
+
+</div>
 </body>
 </html>
