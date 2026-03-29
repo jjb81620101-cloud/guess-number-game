@@ -162,7 +162,14 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
 </div>
 
 <script>
+// 索引 0=空亡, 1=大安, 2=留連, 3=速喜, 4=赤口, 5=小吉
 const ORACLES = [
+  {
+    name: '空亡',
+    cls: 'kong-wang', badge: 'badge-kong-wang',
+    type: '大凶',
+    meaning: '<b>空亡</b>：落空無果，諸事不成。<br>所求之事難以實現，宜靜待時機，勿強求。守舊為宜，切忌冒進。',
+  },
   {
     name: '大安',
     cls: 'da-an', badge: 'badge-da-an',
@@ -192,12 +199,6 @@ const ORACLES = [
     cls: 'xiao-ji', badge: 'badge-xiao-ji',
     type: '小吉',
     meaning: '<b>小吉</b>：小有吉利，事漸順遂。<br>謀事可成，但需時日。出行吉，求財小有所獲，宜積極進取。',
-  },
-  {
-    name: '空亡',
-    cls: 'kong-wang', badge: 'badge-kong-wang',
-    type: '大凶',
-    meaning: '<b>空亡</b>：落空無果，諸事不成。<br>所求之事難以實現，宜靜待時機，勿強求。守舊為宜，切忌冒進。',
   },
 ];
 
