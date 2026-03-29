@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>六壬占卜</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.container {
+  background: rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 48px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+h1 {
+  font-size: 2rem;
+  background: linear-gradient(90deg, #00d9ff, #00ff88);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.subtitle { color: #8892b0; margin-bottom: 32px; font-size: 0.95rem; }
+.btn {
+  padding: 16px 48px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  transition: all 0.3s;
+  margin-top: 16px;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102,126,234,0.4); }
+.result { margin-top: 32px; font-size: 1.1rem; line-height: 2; }
+.numbers { font-size: 2rem; font-weight: bold; color: #00d9ff; margin: 16px 0; }
+.fortune-box {
+  font-size: 2rem;
+  margin-top: 16px;
+  padding: 16px 32px;
+  border-radius: 16px;
+  font-weight: bold;
+  display: inline-block;
+}
+.a0 { background: rgba(0,255,136,0.2); border: 2px solid #00ff88; color: #00ff88; }
+.a1 { background: rgba(0,217,255,0.2); border: 2px solid #00d9ff; color: #00d9ff; }
+.a2 { background: rgba(168,85,247,0.2); border: 2px solid #a855f7; color: #a855f7; }
+.a3 { background: rgba(255,217,61,0.2); border: 2px solid #fee140; color: #fee140; }
+.a4 { background: rgba(255,107,107,0.2); border: 2px solid #ff6b6b; color: #ff6b6b; }
+.a5 { background: rgba(189,189,189,0.2); border: 2px solid #bdbdbd; color: #bdbdbd; }
+.remark { font-size: 0.85rem; color: #8892b0; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔮 六壬占卜</h1>
+  <p class="subtitle">自動隨機測命運</p>
+  <button class="btn" onclick="divination()">✨ 開始占卜</button>
+  <div id="result"></div>
+</div>
+<script>
+const FORTUNES = [
+  { label: '大安', cls: 'a0', desc: '事業安定・萬事吉祥' },
+  { label: '留連', cls: 'a1', desc: '人事遲緩・需耐心待' },
+  { label: '速喜', cls: 'a2', desc: '好事即至・喜訊速達' },
+  { label: '赤口', cls: 'a3', desc: '口舌是非・小心行事' },
+  { label: '小吉', cls: 'a4', desc: '小進之象・努力有得' },
+  { label: '空亡', cls: 'a5', desc: '運勢空幻・謹慎決策' },
+];
+function divination() {
+  const a = Math.floor(Math.random() * 99) + 1;
+  const b = Math.floor(Math.random() * 99) + 1;
+  const c = Math.floor(Math.random() * 99) + 1;
+  const sum = a + b + c - 2;
+  const rem = sum % 6;
+  const f = FORTUNES[rem];
+  document.getElementById('result').innerHTML = `
+    <div class="result">
+      <div class="numbers">(${a} + ${b} + ${c} − 2) ÷ 6</div>
+      <div style="color:#8892b0">= ${sum} ÷ 6</div>
+      <div style="color:#8892b0">餘數 = <strong style="color:#fff">${rem}</strong></div>
+      <div class="fortune-box ${f.cls}">${f.label}</div>
+      <p class="remark">「${f.desc}」</p>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
