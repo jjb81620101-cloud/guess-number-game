@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel 匯出 - 任務回報系統</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --success: #10b981;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+    }
+    body {
+      font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 20px;
+    }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 6px; }
+    .subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 24px; }
+
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .option-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .option-item:hover { border-color: var(--primary); background: #fafafa; }
+    .option-item input[type="radio"] { accent-color: var(--primary); transform: scale(1.15); }
+    .option-item label { cursor: pointer; flex: 1; font-size: 0.9rem; }
+
+    .field-checklist {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+    }
+    .field-check {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .field-check input { accent-color: var(--primary); }
+
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+    .form-row input, .form-row select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.88rem;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    .action-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 10px;
+      overflow-x: auto;
+      display: block;
+    }
+    .preview-table th, .preview-table td {
+      border: 1px solid var(--border);
+      padding: 5px 8px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .preview-table th { background: var(--primary); color: white; }
+    .preview-table tr:nth-child(even) td { background: #f8fafc; }
+    .preview-table { border-radius: 8px; overflow: hidden; }
+
+    .status { margin-top: 12px; font-size: 0.85rem; color: var(--text-secondary); }
+    .status.error { color: var(--danger); }
+    .status.success { color: var(--success); }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--text); color: white;
+      padding: 10px 18px; border-radius: 10px;
+      font-size: 0.88rem; z-index: 9999;
+      transition: opacity 0.3s;
+    }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    .toast.hidden { opacity: 0; pointer-events: none; }
+
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      color: #1e40af;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📥 Excel / CSV 匯出</h1>
+  <p class="subtitle">任務回報系統 — 選擇匯出格式與範圍</p>
+
+  <div class="info-box">
+    💡 匯出功能使用 SheetJS（xlsx）與 jsPDF 函式庫，無需後端即可產生 Excel 檔案。<br>
+    如只需 CSV，亦可直接使用本頁產生的下載連結。
+  </div>
+
+  <!-- Step 1: Select Range -->
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:10px;">步驟 1｜選擇匯出範圍</div>
+    <div class="option-group">
+      <div class="option-item">
+        <input type="radio" name="range" id="rAll" value="all" checked>
+        <label for="rAll">全部任務（共 <span id="countAll">0</span> 筆）</label>
+      </div>
+      <div class="option-item">
+        <input type="radio" name="range" id="rMonth" value="month">
+        <label for="rMonth">本月任務</label>
+      </div>
+      <div class="option-item">
+        <input type="radio" name="range" id="rRange" value="range">
+        <label for="rRange">指定日期範圍</label>
+      </div>
+    </div>
+
+    <div id="dateRangePicker" style="display:none;">
+      <div class="form-row">
+        <label>起始日期</label>
+        <input type="date" id="exportDateStart">
+      </div>
+      <div class="form-row">
+        <label>結束日期</label>
+        <input type="date" id="exportDateEnd">
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Select Fields -->
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:10px;">步驟 2｜選擇匯出欄位</div>
+    <div class="field-checklist">
+      <label class="field-check"><input type="checkbox" checked disabled> 日期</label>
+      <label class="field-check"><input type="checkbox" checked disabled> 開始時間</label>
+      <label class="field-check"><input type="checkbox" checked disabled> 結束時間</label>
+      <label class="field-check"><input type="checkbox" checked disabled> 地點</label>
+      <label class="field-check"><input type="checkbox" checked disabled> 原因</label>
+      <label class="field-check"><input type="checkbox" checked disabled> 解決方法</label>
+      <label class="field-check"><input type="checkbox" id="fPhotos"> 照片（含 Base64）</label>
+      <label class="field-check"><input type="checkbox" id="fCreated"> 建立時間</label>
+    </div>
+  </div>
+
+  <!-- Step 3: Select Format -->
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:10px;">步驟 3｜選擇匯出格式</div>
+    <div class="option-group">
+      <div class="option-item">
+        <input type="radio" name="format" id="fXlsx" value="xlsx" checked>
+        <label for="fXlsx">📊 Excel (.xlsx) — 支援多工作表、分頁設定</label>
+      </div>
+      <div class="option-item">
+        <input type="radio" name="format" id="fCsv" value="csv">
+        <label for="fCsv">📄 CSV (.csv) — 純文字，可用 Excel / Google Sheets 開啟</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:6px;">📋 資料預覽（前 5 筆）</div>
+    <div style="overflow-x:auto;">
+      <table class="preview-table" id="previewTable">
+        <thead><tr><th>日期</th><th>時間</th><th>地點</th><th>原因</th><th>解決方法</th></tr></thead>
+        <tbody id="previewBody"><tr><td colspan="5" style="text-align:center;color:var(--text-secondary)">讀取中...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="status" id="statusMsg">等待匯出...</div>
+  </div>
+
+  <!-- Actions -->
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="doExport()">⬇ 開始匯出</button>
+    <button class="btn btn-outline" onclick="location.reload()">🔄 重置</button>
+    <button class="btn btn-outline" onclick="window.close()">✕ 關閉</button>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<!-- SheetJS CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+// ─── Load tasks from opener window's localStorage ───
+let allTasks = [];
+
+function loadTasks() {
+  try {
+    const raw = opener.localStorage.getItem('task_report_data');
+    allTasks = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    allTasks = [];
+  }
+  document.getElementById('countAll').textContent = allTasks.length;
+  renderPreview();
+}
+
+// ─── Range selection ───
+document.querySelectorAll('input[name="range"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('dateRangePicker').style.display =
+      r.value === 'range' ? 'block' : 'none';
+    renderPreview();
+  });
+});
+
+document.getElementById('exportDateStart').addEventListener('change', renderPreview);
+document.getElementById('exportDateEnd').addEventListener('change', renderPreview);
+
+// ─── Get filtered tasks ───
+function getFilteredTasks() {
+  const range = document.querySelector('input[name="range"]:checked').value;
+  const now = new Date();
+
+  return allTasks.filter(t => {
+    if (range === 'all') return true;
+    if (range === 'month') {
+      const d = new Date(t.date);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }
+    if (range === 'range') {
+      const start = document.getElementById('exportDateStart').value;
+      const end = document.getElementById('exportDateEnd').value;
+      if (!start || !end) return true;
+      return t.date >= start && t.date <= end;
+    }
+    return true;
+  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+// ─── Render preview ───
+function renderPreview() {
+  const data = getFilteredTasks().slice(0, 5);
+  const tbody = document.getElementById('previewBody');
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-secondary)">沒有符合的資料</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(t => `
+    <tr>
+      <td>${t.date || '—'}</td>
+      <td>${t.timeStart || ''} – ${t.timeEnd || ''}</td>
+      <td>${esc(t.location || '')}</td>
+      <td>${esc((t.reason || '').substring(0, 30))}${t.reason && t.reason.length > 30 ? '…' : ''}</td>
+      <td>${esc((t.solution || '').substring(0, 30))}${t.solution && t.solution.length > 30 ? '…' : ''}</td>
+    </tr>
+  `).join('');
+
+  const filtered = getFilteredTasks();
+  document.getElementById('statusMsg').textContent =
+    `共 ${filtered.length} 筆記錄符合條件`;
+}
+
+// ─── Export ───
+function doExport() {
+  const data = getFilteredTasks();
+  if (data.length === 0) {
+    toast('沒有可匯出的資料', 'error');
+    return;
+  }
+
+  const fmt = document.querySelector('input[name="format"]:checked').value;
+  const includePhotos = document.getElementById('fPhotos').checked;
+  const includeCreated = document.getElementById('fCreated').checked;
+
+  // Build columns
+  const cols = ['date', 'timeStart', 'timeEnd', 'location', 'reason', 'solution'];
+  const headers = ['日期', '開始時間', '結束時間', '地點', '原因', '解決方法'];
+  if (includeCreated) { cols.push('createdAt'); headers.push('建立時間'); }
+  if (includePhotos) { cols.push('photos'); headers.push('照片(Base64)'); }
+
+  const rows = data.map(t => cols.map(c => {
+    if (c === 'createdAt') return t.createdAt ? formatDT(t.createdAt) : '';
+    if (c === 'photos') return includePhotos ? (t.photos || []).join('\n') : '';
+    return t[c] || '';
+  }));
+
+  const timestamp = new Date().toISOString().slice(0, 10);
+
+  if (fmt === 'csv') {
+    exportCSV(headers, rows, timestamp);
+  } else {
+    exportXLSX(headers, rows, data, cols, includePhotos, timestamp);
+  }
+}
+
+function exportCSV(headers, rows, timestamp) {
+  const escape = v => {
+    const s = String(v);
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  };
+
+  const lines = [
+    headers.map(escape).join(','),
+    ...rows.map(r => r.map(escape).join(','))
+  ];
+
+  downloadFile(
+    new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' }),
+    `任務回報_${timestamp}.csv`
+  );
+  toast(`成功匯出 CSV（${rows.length} 筆）`, 'success');
+}
+
+function exportXLSX(headers, rows, data, cols, includePhotos, timestamp) {
+  const wsData = [headers, ...rows];
+
+  // Column widths
+  const colWidths = headers.map((h, i) => {
+    if (h === '照片(Base64)') return { wch: 30 };
+    if (h === '原因' || h === '解決方法') return { wch: 40 };
+    if (h === '地點') return { wch: 25 };
+    return { wch: 18 };
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = colWidths;
+  ws['!rows'] = wsData.map(() => ({ hpt: 18 }));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '任務回報');
+
+  // Add a summary sheet
+  const summaryData = [
+    ['任務回報系統 — 匯出摘要'],
+    [''],
+    ['匯出日期', new Date().toLocaleString('zh-TW')],
+    ['資料範圍', document.querySelector('input[name="range"]:checked').nextElementSibling.textContent.trim()],
+    ['總筆數', rows.length],
+    [''],
+    ['欄位說明'],
+    ['日期', '任務發生的日期'],
+    ['開始時間', '任務開始時間'],
+    ['結束時間', '任務結束時間'],
+    ['地點', '任務發生地點'],
+    ['原因', '任務發生原因'],
+    ['解決方法', '處理方式與結果'],
+    ['建立時間', '資料建立時間戳'],
+    ['照片(Base64)', '照片以 Base64 編碼儲存（PNG格式）']
+  ];
+  const wsSum = XLSX.utils.aoa_to_sheet(summaryData);
+  wsSum['!cols'] = [{ wch: 20 }, { wch: 50 }];
+  XLSX.utils.book_append_sheet(wb, wsSum, '說明');
+
+  XLSX.writeFile(wb, `任務回報_${timestamp}.xlsx`);
+  toast(`成功匯出 XLSX（${rows.length} 筆）`, 'success');
+}
+
+// ─── Utilities ───
+function downloadFile(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function formatDT(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+let toastTimer = null;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
+// ─── Init ───
+loadTasks();
+</script>
+</body>
+</html>

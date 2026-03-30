@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>任務回報系統</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --primary-light: #eef2ff;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header h1 {
+      font-size: 1.6rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #059669; }
+
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+
+    .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--primary-light);
+    }
+
+    .card-header h2 {
+      font-size: 1rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .card-body { padding: 20px; }
+
+    /* Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border 0.2s;
+      background: white;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+    }
+
+    .form-group textarea { resize: vertical; min-height: 72px; }
+
+    /* Photo Upload */
+    .photo-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .photo-upload-area:hover,
+    .photo-upload-area.dragover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .photo-upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .photo-upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .photo-upload-text { font-size: 0.85rem; color: var(--text-secondary); }
+
+    #photoPreview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .photo-thumb {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+    }
+
+    .photo-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-thumb .remove-photo {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(239,68,68,0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+
+    .stat-item .stat-num {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Task list */
+    .task-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .task-filters input[type="date"] {
+      padding: 7px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+
+    .task-filters input[type="text"] {
+      padding: 7px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .task-item {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .task-item:hover {
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(79,70,229,0.08);
+    }
+
+    .task-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .task-date-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .task-time-badge {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .task-location {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .task-field {
+      margin-bottom: 5px;
+    }
+
+    .task-field-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .task-field-value {
+      font-size: 0.88rem;
+      color: var(--text);
+      margin-top: 1px;
+    }
+
+    .task-photos {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .task-photos img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .task-photos img:hover { transform: scale(1.08); }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 10px; opacity: 0.5; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .pagination button {
+      padding: 6px 12px;
+      border: 1.5px solid var(--border);
+      background: white;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.15s;
+      color: var(--text);
+    }
+
+    .pagination button:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .pagination button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .page-info {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      padding: 0 8px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-overlay.hidden { display: none; }
+
+    .modal {
+      background: white;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 { font-size: 1rem; color: var(--text); }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: color 0.15s;
+    }
+
+    .modal-close:hover { color: var(--danger); }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .lightbox.hidden { display: none; }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 8px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--text);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      z-index: 3000;
+      transition: opacity 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 320px;
+    }
+
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    .toast.hidden { opacity: 0; pointer-events: none; }
+
+    /* Section title */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>📋 任務回報系統</h1>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="exportPage()">📥 Excel 匯出</button>
+      <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">📤 Excel 匯入</button>
+      <input type="file" id="importFile" accept=".xlsx,.xls,.csv,.json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-primary" onclick="openAddModal()">+ 新增任務</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item"><span class="stat-num" id="statTotal">0</span><span>總任務</span></div>
+    <div class="stat-item"><span class="stat-num" id="statThisMonth">0</span><span>本月</span></div>
+  </div>
+
+  <!-- Task List Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2>任務列表</h2>
+      <span id="listCount" style="font-size:0.8rem;color:var(--text-secondary)"></span>
+    </div>
+    <div class="card-body">
+
+      <!-- Filters -->
+      <div class="task-filters">
+        <input type="date" id="filterDate" onchange="renderTasks()">
+        <input type="text" id="filterSearch" placeholder="搜尋地點或原因..." oninput="renderTasks()">
+        <button class="btn btn-outline btn-sm" onclick="clearFilters()">清除</button>
+      </div>
+
+      <div id="taskList"></div>
+      <div id="pagination" class="pagination"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay hidden" id="taskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">新增任務</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>日期 *</label>
+          <input type="date" id="taskDate" required>
+        </div>
+        <div class="form-group">
+          <label>開始時間 *</label>
+          <input type="time" id="taskTimeStart" required>
+        </div>
+        <div class="form-group">
+          <label>結束時間 *</label>
+          <input type="time" id="taskTimeEnd" required>
+        </div>
+        <div class="form-group full">
+          <label>地點 *</label>
+          <input type="text" id="taskLocation" placeholder="例如：台北市大安區" required>
+        </div>
+        <div class="form-group full">
+          <label>原因 *</label>
+          <textarea id="taskReason" placeholder="說明任務發生的原因..." required></textarea>
+        </div>
+        <div class="form-group full">
+          <label>解決方法 *</label>
+          <textarea id="taskSolution" placeholder="說明處理的過程與結果..." required></textarea>
+        </div>
+        <div class="form-group full">
+          <label>照片上傳</label>
+          <div class="photo-upload-area" id="uploadArea" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)">
+            <input type="file" id="photoInput" accept="image/*" multiple onchange="handlePhotoSelect(event)">
+            <div class="photo-upload-icon">📷</div>
+            <div class="photo-upload-text">拖曳或點擊上傳照片</div>
+          </div>
+          <div id="photoPreview"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveTask()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Detail Modal -->
+<div class="modal-overlay hidden" id="viewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>任務詳情</h3>
+      <button class="modal-close" onclick="closeViewModal()">✕</button>
+    </div>
+    <div class="card-body" id="viewContent"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeViewModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<!-- Toast -->
+<div class="toast hidden" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────
+// State
+// ─────────────────────────────────────────
+const STORAGE_KEY = 'task_report_data';
+const PAGE_SIZE = 10;
+let tasks = [];
+let editingId = null;
+let pendingPhotos = []; // base64 strings for current form
+let currentPage = 1;
+
+// ─────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────
+function init() {
+  loadTasks();
+  // set default date to today
+  document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
+  renderTasks();
+  updateStats();
+}
+
+// ─────────────────────────────────────────
+// Storage
+// ─────────────────────────────────────────
+function loadTasks() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    tasks = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    tasks = [];
+  }
+}
+
+function saveTasks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  updateStats();
+}
+
+// ─────────────────────────────────────────
+// Stats
+// ─────────────────────────────────────────
+function updateStats() {
+  document.getElementById('statTotal').textContent = tasks.length;
+  const now = new Date();
+  const thisMonth = tasks.filter(t => {
+    const d = new Date(t.date);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }).length;
+  document.getElementById('statThisMonth').textContent = thisMonth;
+}
+
+// ─────────────────────────────────────────
+// Render Task List
+// ─────────────────────────────────────────
+function getFilteredTasks() {
+  const dateVal = document.getElementById('filterDate').value;
+  const searchVal = document.getElementById('filterSearch').value.trim().toLowerCase();
+
+  return tasks.filter(t => {
+    const matchDate = !dateVal || t.date === dateVal;
+    const matchSearch = !searchVal ||
+      (t.location && t.location.toLowerCase().includes(searchVal)) ||
+      (t.reason && t.reason.toLowerCase().includes(searchVal)) ||
+      (t.solution && t.solution.toLowerCase().includes(searchVal));
+    return matchDate && matchSearch;
+  }).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function renderTasks() {
+  const filtered = getFilteredTasks();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const page = filtered.slice(start, start + PAGE_SIZE);
+
+  const listEl = document.getElementById('taskList');
+  const countEl = document.getElementById('listCount');
+
+  countEl.textContent = `共 ${filtered.length} 筆`;
+
+  if (page.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>目前沒有任務記錄</p>
+      </div>`;
+  } else {
+    listEl.innerHTML = page.map(t => `
+      <div class="task-item">
+        <div class="task-item-header">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="task-date-badge">${formatDate(t.date)}</span>
+            <span class="task-time-badge">${t.timeStart} – ${t.timeEnd}</span>
+          </div>
+          <div class="task-actions">
+            <button class="btn btn-outline btn-sm" onclick="viewTask('${t.id}')">👁 查看</button>
+            <button class="btn btn-outline btn-sm" onclick="editTask('${t.id}')">✏ 編輯</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTask('${t.id}')">🗑</button>
+          </div>
+        </div>
+        <div class="task-location">📍 ${escHtml(t.location || '—')}</div>
+        <div class="task-field">
+          <div class="task-field-label">原因</div>
+          <div class="task-field-value">${escHtml(t.reason || '—')}</div>
+        </div>
+        <div class="task-field">
+          <div class="task-field-label">解決方法</div>
+          <div class="task-field-value">${escHtml(t.solution || '—')}</div>
+        </div>
+        ${t.photos && t.photos.length > 0 ? `
+        <div class="task-photos">
+          ${t.photos.map((p, i) => `<img src="${p}" onclick="openLightbox('${p}')" alt="照片${i+1}">`).join('')}
+        </div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  renderPagination(totalPages, filtered.length);
+}
+
+function renderPagination(totalPages, totalItems) {
+  const el = document.getElementById('pagination');
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+  const items = [];
+  const prevDisabled = currentPage <= 1;
+  const nextDisabled = currentPage >= totalPages;
+
+  items.push(`<button ${prevDisabled ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">‹ 上一頁</button>`);
+
+  // Page numbers with ellipsis
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) items.push(pageBtn(i));
+  } else {
+    items.push(pageBtn(1));
+    if (currentPage > 3) items.push('<span style="color:var(--text-secondary)">…</span>');
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      items.push(pageBtn(i));
+    }
+    if (currentPage < totalPages - 2) items.push('<span style="color:var(--text-secondary)">…</span>');
+    items.push(pageBtn(totalPages));
+  }
+
+  items.push(`<button ${nextDisabled ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">下一頁 ›</button>`);
+  items.push(`<span class="page-info">第 ${currentPage} / ${totalPages} 頁</span>`);
+
+  el.innerHTML = items.join('');
+}
+
+function pageBtn(n) {
+  return `<button class="${n === currentPage ? 'active' : ''}" onclick="goPage(${n})">${n}</button>`;
+}
+
+function goPage(n) {
+  const filtered = getFilteredTasks();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  currentPage = Math.min(Math.max(1, n), totalPages);
+  renderTasks();
+}
+
+// ─────────────────────────────────────────
+// Modal Controls
+// ─────────────────────────────────────────
+function openAddModal() {
+  editingId = null;
+  pendingPhotos = [];
+  document.getElementById('modalTitle').textContent = '新增任務';
+  document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('taskTimeStart').value = '';
+  document.getElementById('taskTimeEnd').value = '';
+  document.getElementById('taskLocation').value = '';
+  document.getElementById('taskReason').value = '';
+  document.getElementById('taskSolution').value = '';
+  document.getElementById('photoPreview').innerHTML = '';
+  document.getElementById('photoInput').value = '';
+  document.getElementById('taskModal').classList.remove('hidden');
+}
+
+function editTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editingId = id;
+  pendingPhotos = [...(t.photos || [])];
+  document.getElementById('modalTitle').textContent = '編輯任務';
+  document.getElementById('taskDate').value = t.date;
+  document.getElementById('taskTimeStart').value = t.timeStart;
+  document.getElementById('taskTimeEnd').value = t.timeEnd;
+  document.getElementById('taskLocation').value = t.location;
+  document.getElementById('taskReason').value = t.reason;
+  document.getElementById('taskSolution').value = t.solution;
+  renderPhotoPreview();
+  document.getElementById('taskModal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('taskModal').classList.add('hidden');
+  pendingPhotos = [];
+}
+
+function viewTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  const content = document.getElementById('viewContent');
+  content.innerHTML = `
+    <div style="margin-bottom:12px;">
+      <span class="task-date-badge">${formatDate(t.date)}</span>
+      <span class="task-time-badge">${t.timeStart} – ${t.timeEnd}</span>
+    </div>
+    <div class="task-field">
+      <div class="task-field-label">📍 地點</div>
+      <div class="task-field-value">${escHtml(t.location || '—')}</div>
+    </div>
+    <div class="task-field">
+      <div class="task-field-label">原因</div>
+      <div class="task-field-value">${nl2br(escHtml(t.reason || '—'))}</div>
+    </div>
+    <div class="task-field">
+      <div class="task-field-label">解決方法</div>
+      <div class="task-field-value">${nl2br(escHtml(t.solution || '—'))}</div>
+    </div>
+    ${t.photos && t.photos.length > 0 ? `
+    <div style="margin-top:10px;">
+      <div class="task-field-label" style="margin-bottom:6px;">📷 照片</div>
+      <div class="task-photos">
+        ${t.photos.map(p => `<img src="${p}" onclick="openLightbox('${p}')" style="width:80px;height:80px;" alt="">`).join('')}
+      </div>
+    </div>` : ''}
+    <div style="margin-top:14px;font-size:0.78rem;color:var(--text-secondary);">
+      建立：${t.createdAt ? formatDateTime(t.createdAt) : '—'}　更新：${t.updatedAt ? formatDateTime(t.updatedAt) : '—'}
+    </div>
+  `;
+  document.getElementById('viewModal').classList.remove('hidden');
+}
+
+function closeViewModal() {
+  document.getElementById('viewModal').classList.add('hidden');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.add('hidden');
+}
+
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.remove('hidden');
+}
+
+// ─────────────────────────────────────────
+// Photo Handling
+// ─────────────────────────────────────────
+function handlePhotoSelect(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(readPhotoFile);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadArea').classList.remove('dragover');
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  files.forEach(readPhotoFile);
+}
+
+function readPhotoFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    pendingPhotos.push(ev.target.result);
+    renderPhotoPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderPhotoPreview() {
+  const el = document.getElementById('photoPreview');
+  el.innerHTML = pendingPhotos.map((p, i) => `
+    <div class="photo-thumb">
+      <img src="${p}" alt="預覽${i+1}">
+      <button class="remove-photo" onclick="removePhoto(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removePhoto(index) {
+  pendingPhotos.splice(index, 1);
+  renderPhotoPreview();
+}
+
+// ─────────────────────────────────────────
+// CRUD
+// ─────────────────────────────────────────
+function saveTask() {
+  const date = document.getElementById('taskDate').value;
+  const timeStart = document.getElementById('taskTimeStart').value;
+  const timeEnd = document.getElementById('taskTimeEnd').value;
+  const location = document.getElementById('taskLocation').value.trim();
+  const reason = document.getElementById('taskReason').value.trim();
+  const solution = document.getElementById('taskSolution').value.trim();
+
+  if (!date || !timeStart || !timeEnd || !location || !reason || !solution) {
+    toast('請填寫所有必填欄位', 'error');
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  if (editingId) {
+    const idx = tasks.findIndex(t => t.id === editingId);
+    if (idx !== -1) {
+      tasks[idx] = {
+        ...tasks[idx],
+        date, timeStart, timeEnd, location, reason, solution,
+        photos: pendingPhotos,
+        updatedAt: now
+      };
+    }
+    toast('任務已更新', 'success');
+  } else {
+    tasks.push({
+      id: generateId(),
+      date, timeStart, timeEnd, location, reason, solution,
+      photos: pendingPhotos,
+      createdAt: now,
+      updatedAt: now
+    });
+    toast('任務已新增', 'success');
+  }
+
+  saveTasks();
+  closeModal();
+  renderTasks();
+}
+
+function deleteTask(id) {
+  if (!confirm('確定要刪除這筆記錄嗎？')) return;
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks();
+  renderTasks();
+  toast('已刪除', 'success');
+}
+
+// ─────────────────────────────────────────
+// Export — open export.html in new window
+// ─────────────────────────────────────────
+function exportPage() {
+  const filtered = getFilteredTasks();
+  if (filtered.length === 0) {
+    toast('目前沒有可匯出的資料', 'error');
+    return;
+  }
+  const params = new URLSearchParams({ mode: 'export' });
+  const win = window.open('export.html?' + params.toString(), '_blank');
+  if (!win) toast('請允許彈出視窗', 'error');
+}
+
+// ─────────────────────────────────────────
+// Import
+// ─────────────────────────────────────────
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  const reader = new FileReader();
+
+  reader.onload = function(ev) {
+    try {
+      let imported = [];
+
+      if (ext === 'json') {
+        imported = JSON.parse(ev.target.result);
+        if (!Array.isArray(imported)) throw new Error('JSON 格式錯誤');
+      } else if (ext === 'csv' || ext === 'xlsx' || ext === 'xls') {
+        // Use SheetJS for Excel, papaparse for CSV
+        if (ext === 'csv') {
+          imported = parseCSV(ev.target.result);
+        } else {
+          imported = parseExcel(ev.target.result);
+        }
+      }
+
+      // Normalize and merge
+      const normalized = imported.map(item => ({
+        id: generateId(),
+        date: item.date || '',
+        timeStart: item.timeStart || item.startTime || '',
+        timeEnd: item.timeEnd || item.endTime || '',
+        location: item.location || item.place || '',
+        reason: item.reason || item.cause || '',
+        solution: item.solution || item.resolution || item.method || '',
+        photos: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+
+      const count = normalized.length;
+      tasks = [...normalized, ...tasks];
+      saveTasks();
+      renderTasks();
+      toast(`成功匯入 ${count} 筆任務`, 'success');
+
+    } catch (err) {
+      toast('匯入失敗：' + err.message, 'error');
+    }
+    e.target.value = '';
+  };
+
+  if (ext === 'json') {
+    reader.readAsText(file);
+  } else {
+    reader.readAsBinaryString(file);
+  }
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim().replace(/"/g, ''));
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = vals[i] || '');
+    return obj;
+  });
+}
+
+function parseExcel(binary) {
+  // SheetJS CDN is loaded in export.html; for here we use a simple approach
+  // If SheetJS is available globally, use it; otherwise return empty
+  if (typeof XLSX !== 'undefined') {
+    const data = new Uint8Array(binary.split('').map(c => c.charCodeAt(0)));
+    const wb = XLSX.read(data, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(ws);
+    return json;
+  }
+  // Fallback: try to parse as CSV-like
+  return parseCSV(new TextDecoder().decode(binary));
+}
+
+// ─────────────────────────────────────────
+// Filters
+// ─────────────────────────────────────────
+function clearFilters() {
+  document.getElementById('filterDate').value = '';
+  document.getElementById('filterSearch').value = '';
+  currentPage = 1;
+  renderTasks();
+}
+
+// ─────────────────────────────────────────
+// Utilities
+// ─────────────────────────────────────────
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+function formatDateTime(isoStr) {
+  const d = new Date(isoStr);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function nl2br(str) {
+  return str.replace(/\n/g, '<br>');
+}
+
+let toastTimer = null;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 2800);
+}
+
+// ─────────────────────────────────────────
+// Start
+// ─────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
