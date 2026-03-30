@@ -141,8 +141,7 @@ textarea { resize: vertical; min-height: 100px; }
   </div>
 </div>
 <script>
-const BOT_TOKEN = '8633869634:AAHEgMmzYYFqh1BEQQyGfWkO9uD6ikuf6DY';
-const CHAT_ID = '8171564688';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfLE3rBpABLyPAItOAuL0vyiuPXHCfK8dVUYeVj-GqsJ-T1hYNd2ehamwhWp-SzTR6/exec';
 
 function handlePhoto(input) {
   if (input.files && input.files[0]) {
@@ -158,41 +157,24 @@ function handlePhoto(input) {
 document.getElementById('form').onsubmit = async function(e) {
   e.preventDefault();
   const form = e.target;
-  const data = new FormData(form);
   
-  // 組合訊息
-  let msg = '📋 任務回報\n';
-  msg += '━━━━━━━━━━━━━\n';
-  msg += '👤 姓名：' + form.name.value + '\n';
-  msg += '📅 日期：' + form.date.value + '\n';
-  msg += '⏰ 時間：' + form.time_start.value + ' ~ ' + form.time_end.value + '\n';
-  msg += '📍 地點：' + form.location.value + '\n';
-  msg += '❓ 原因：' + (form.reason.value || '無') + '\n';
-  msg += '✅ 解決：' + (form.solution.value || '無') + '\n';
+  // 組合資料
+  const payload = {
+    name: form.name.value,
+    date: form.date.value,
+    time_start: form.time_start.value,
+    time_end: form.time_end.value,
+    location: form.location.value,
+    reason: form.reason.value,
+    solution: form.solution.value
+  };
   
-  // 發送文字到 Telegram
-  await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
+  // 發送到 Google Sheets
+  await fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      chat_id: CHAT_ID,
-      text: msg,
-      parse_mode: 'HTML'
-    })
+    headers: {'Content-Type':'text/plain'},
+    body: JSON.stringify(payload)
   });
-  
-  // 發送照片（如有）
-  const photo = form.photo.files[0];
-  if (photo) {
-    const photoData = new FormData();
-    photoData.append('chat_id', CHAT_ID);
-    photoData.append('photo', photo);
-    photoData.append('caption', '📷 任務回報照片 - ' + form.name.value);
-    await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendPhoto', {
-      method: 'POST',
-      body: photoData
-    });
-  }
   
   // 顯示成功
   form.style.display = 'none';
