@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>任務回報表單</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+h1 {
+  text-align: center;
+  color: #1a1a2e;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+input, textarea, select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #4facfe;
+  box-shadow: 0 0 0 4px rgba(79,172,254,0.1);
+}
+textarea { resize: vertical; min-height: 100px; }
+.btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(79,172,254,0.4);
+}
+.success {
+  display: none;
+  text-align: center;
+  padding: 20px;
+  background: #d4edda;
+  border-radius: 12px;
+  color: #155724;
+  margin-top: 20px;
+}
+.photo-upload {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  text-align: center;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.photo-upload:hover { border-color: #4facfe; }
+#preview {
+  max-width: 100%;
+  margin-top: 10px;
+  border-radius: 8px;
+  display: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📝 任務回報表單</h1>
+  <form id="form">
+    <div class="form-group">
+      <label>👤 姓名 *</label>
+      <input type="text" name="name" required placeholder="請輸入姓名">
+    </div>
+    <div class="form-group">
+      <label>📅 日期 *</label>
+      <input type="date" name="date" required>
+    </div>
+    <div class="form-group">
+      <label>⏰ 時間 *</label>
+      <div style="display:flex; gap:10px">
+        <input type="time" name="time_start" required placeholder="開始時間">
+        <span style="line-height:50px">~</span>
+        <input type="time" name="time_end" required placeholder="結束時間">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>📍 地點 *</label>
+      <input type="text" name="location" required placeholder="工作地點">
+    </div>
+    <div class="form-group">
+      <label>❓ 原因</label>
+      <textarea name="reason" placeholder="請詳細描述問題或原因"></textarea>
+    </div>
+    <div class="form-group">
+      <label>✅ 解決方法</label>
+      <textarea name="solution" placeholder="請說明處理方式"></textarea>
+    </div>
+    <div class="form-group">
+      <label>📷 照片上傳（可選）</label>
+      <div class="photo-upload" onclick="document.getElementById('photo').click()">
+        <input type="file" id="photo" name="photo" accept="image/*" style="display:none" onchange="handlePhoto(this)">
+        <p style="color:#666">📷 點擊上傳照片</p>
+        <img id="preview" alt="預覽">
+      </div>
+    </div>
+    <button type="submit" class="btn">🚀 送出回報</button>
+  </form>
+  <div class="success" id="success">
+    <h3>✅ 已送出！</h3>
+    <p>感謝回報，管理員將盡快處理</p>
+  </div>
+</div>
+<script>
+const BOT_TOKEN = '8633869634:AAHEgMmzYYFqh1BEQQyGfWkO9uD6ikuf6DY';
+const CHAT_ID = '8171564688';
+
+function handlePhoto(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('preview').src = e.target.result;
+      document.getElementById('preview').style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+document.getElementById('form').onsubmit = async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  
+  // 組合訊息
+  let msg = '📋 任務回報\n';
+  msg += '━━━━━━━━━━━━━\n';
+  msg += '👤 姓名：' + form.name.value + '\n';
+  msg += '📅 日期：' + form.date.value + '\n';
+  msg += '⏰ 時間：' + form.time_start.value + ' ~ ' + form.time_end.value + '\n';
+  msg += '📍 地點：' + form.location.value + '\n';
+  msg += '❓ 原因：' + (form.reason.value || '無') + '\n';
+  msg += '✅ 解決：' + (form.solution.value || '無') + '\n';
+  
+  // 發送文字到 Telegram
+  await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      chat_id: CHAT_ID,
+      text: msg,
+      parse_mode: 'HTML'
+    })
+  });
+  
+  // 發送照片（如有）
+  const photo = form.photo.files[0];
+  if (photo) {
+    const photoData = new FormData();
+    photoData.append('chat_id', CHAT_ID);
+    photoData.append('photo', photo);
+    photoData.append('caption', '📷 任務回報照片 - ' + form.name.value);
+    await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendPhoto', {
+      method: 'POST',
+      body: photoData
+    });
+  }
+  
+  // 顯示成功
+  form.style.display = 'none';
+  document.getElementById('success').style.display = 'block';
+};
+</script>
+</body>
+</html>
