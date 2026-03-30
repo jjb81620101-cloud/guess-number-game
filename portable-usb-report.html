@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw 隨身碟可行性報告</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100vh;
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 30px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.header h1 {
+  font-size: 2em;
+  color: #00d9ff;
+  margin-bottom: 10px;
+}
+.header .subtitle {
+  color: #888;
+  font-size: 0.95em;
+}
+.card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 25px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+h2 {
+  color: #00d9ff;
+  font-size: 1.3em;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(0,217,255,0.3);
+}
+h3 {
+  color: #ffd700;
+  font-size: 1.1em;
+  margin: 15px 0 10px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+  background: rgba(0,217,255,0.1);
+  color: #00d9ff;
+  font-weight: 600;
+}
+tr:hover {
+  background: rgba(255,255,255,0.03);
+}
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  margin: 2px;
+}
+.badge-green { background: rgba(0,255,136,0.2); color: #00ff88; }
+.badge-yellow { background: rgba(255,215,0,0.2); color: #ffd700; }
+.badge-red { background: rgba(255,80,80,0.2); color: #ff5050; }
+.badge-blue { background: rgba(0,217,255,0.2); color: #00d9ff; }
+.code {
+  background: rgba(0,0,0,0.3);
+  padding: 15px;
+  border-radius: 8px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.9em;
+  overflow-x: auto;
+  margin: 10px 0;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.highlight {
+  background: rgba(255,215,0,0.1);
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #ffd700;
+  margin: 15px 0;
+}
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, #00d9ff, #ffd700);
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -26px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #00d9ff;
+  box-shadow: 0 0 10px rgba(0,217,255,0.5);
+}
+.footer {
+  text-align: center;
+  margin-top: 40px;
+  padding: 20px;
+  color: #666;
+  font-size: 0.85em;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>📦 OpenClaw 隨身碟可行性報告</h1>
+  <p class="subtitle">評估日期：2026-03-30 | 報告人：蝦管</p>
+</div>
+
+<!-- 現狀評估 -->
+<div class="card">
+  <h2>🔍 現狀評估</h2>
+  <table>
+    <tr>
+      <th>項目</th>
+      <th>現況</th>
+      <th>說明</th>
+    </tr>
+    <tr>
+      <td>核心程式</td>
+      <td><span class="badge badge-yellow">npm 全域</span></td>
+      <td>需 Node.js 22+ 運行</td>
+    </tr>
+    <tr>
+      <td>資料大小</td>
+      <td><span class="badge badge-blue">~470 MB</span></td>
+      <td>含 agents、workspace、credentials</td>
+    </tr>
+    <tr>
+      <td>設定位置</td>
+      <td><span class="badge badge-blue">~/.openclaw/</span></td>
+      <td>可透過 OPENCLAW_HOME 自訂</td>
+    </tr>
+    <tr>
+      <td>攜帶性</td>
+      <td><span class="badge badge-yellow">⚠️ 路徑依賴</span></td>
+      <td>新電腦需設定環境變數</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 三種方案 -->
+<div class="card">
+  <h2>🗂️ 三種可行方案</h2>
+  <table>
+    <tr>
+      <th>方案</th>
+      <th>描述</th>
+      <th>難度</th>
+      <th>限制</th>
+    </tr>
+    <tr>
+      <td><span class="badge badge-green">A. 全資料攜帶</span></td>
+      <td>隨身碟放 ~/.openclaw</td>
+      <td>⭐ 最簡</td>
+      <td>需新電腦已裝 Node</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-yellow">B. Docker 容器</span></td>
+      <td>隨身碟放 Portable Docker</td>
+      <td>⭐⭐⭐</td>
+      <td>需 USB 3.0+</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-red">C. 完全自含</span></td>
+      <td>從原始碼編譯</td>
+      <td>⭐⭐⭐⭐</td>
+      <td>複雜，磁碟大</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 方案 A 詳細 -->
+<div class="card">
+  <h2>⚡ 方案 A 詳解（推薦）</h2>
+  
+  <h3>📁 建議資料夾結構</h3>
+  <div class="code">
+隨身碟/
+└── .openclaw/
+    ├── agents/         # GSwitch 團隊設定
+    ├── workspace/      # 任務資料
+    ├── credentials/    # API 金鑰
+    ├── config.json     # 設定檔
+    └── memory/         # 記憶資料
+  </div>
+
+  <h3>🚀 新電腦設定流程</h3>
+  <div class="timeline">
+    <div class="timeline-item">
+      <strong>步驟 1：確認 Node.js 版本</strong>
+      <div class="code">node -v  # 需 v22.14+ 或 v24+</div>
+    </div>
+    <div class="timeline-item">
+      <strong>步驟 2：設定環境變數</strong>
+      <div class="code"># Windows (PowerShell)
+$env:OPENCLAW_HOME = "D:\USB\.openclaw"
+
+# Linux/macOS
+export OPENCLAW_HOME="/mnt/usb/.openclaw"</div>
+    </div>
+    <div class="timeline-item">
+      <strong>步驟 3：啟動 OpenClaw</strong>
+      <div class="code">openclaw start</div>
+    </div>
+  </div>
+</div>
+
+<!-- 方案 A 限制 -->
+<div class="card">
+  <h2>⚠️ 方案 A 限制說明</h2>
+  <table>
+    <tr>
+      <th>限制項目</th>
+      <th>說明</th>
+      <th>解決方案</th>
+    </tr>
+    <tr>
+      <td>Node.js</td>
+      <td>目標電腦需已安裝</td>
+      <td>攜帶 Node 安裝檔或用Portable版本</td>
+    </tr>
+    <tr>
+      <td>效能</td>
+      <td>USB 2.0 會慢 3-5x</td>
+      <td>使用 USB 3.0+ 或內接 SSD</td>
+    </tr>
+    <tr>
+      <td>系統相容</td>
+      <td>Linux/macOS 可直接用</td>
+      <td>Windows 需 WSL2</td>
+    </tr>
+    <tr>
+      <td>安全性</td>
+      <td>金鑰在隨身碟</td>
+      <td>使用後拔出，妥善保管</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 完整比較表 -->
+<div class="card">
+  <h2>📊 三方案完整比較</h2>
+  <table>
+    <tr>
+      <th>評估項目</th>
+      <th>方案 A</th>
+      <th>方案 B</th>
+      <th>方案 C</th>
+    </tr>
+    <tr>
+      <td>攜帶性</td>
+      <td><span class="badge badge-green">✅ 高</span></td>
+      <td><span class="badge badge-green">✅ 高</span></td>
+      <td><span class="badge badge-green">✅ 高</span></td>
+    </tr>
+    <tr>
+      <td>隱私性</td>
+      <td><span class="badge badge-green">✅ 自管</span></td>
+      <td><span class="badge badge-yellow">⚠️ Docker</span></td>
+      <td><span class="badge badge-green">✅ 自管</span></td>
+    </tr>
+    <tr>
+      <td>效能</td>
+      <td><span class="badge badge-yellow">⭐⭐⭐</span></td>
+      <td><span class="badge badge-yellow">⭐⭐</span></td>
+      <td><span class="badge badge-yellow">⭐⭐⭐</span></td>
+    </tr>
+    <tr>
+      <td>設定難度</td>
+      <td><span class="badge badge-green">⭐ 最簡</span></td>
+      <td><span class="badge badge-yellow">⭐⭐⭐</span></td>
+      <td><span class="badge badge-red">⭐⭐⭐⭐</span></td>
+    </tr>
+    <tr>
+      <td>脫機可用</td>
+      <td><span class="badge badge-yellow">⚠️ 需 Node</span></td>
+      <td><span class="badge badge-yellow">⚠️ 需 Docker</span></td>
+      <td><span class="badge badge-yellow">⚠️ 需環境</span></td>
+    </tr>
+    <tr>
+      <td>推薦指數</td>
+      <td><span class="badge badge-green">★★★★★</span></td>
+      <td><span class="badge badge-yellow">★★★</span></td>
+      <td><span class="badge badge-red">★★</span></td>
+    </tr>
+  </table>
+</div>
+
+<!-- 結論 -->
+<div class="highlight">
+  <h2>🎯 結論</h2>
+  <p><strong>方案 A（全資料攜帶）</strong>是最快、最簡單的方案。</p>
+  <p>建議少爺先用隨身碟設定 <code>OPENCLAW_HOME</code>，測試在不同電腦的移轉效果。</p>
+  <p>若未來有更高度隱私需求，再評估方案 C（完全自含編譯）。</p>
+</div>
+
+<div class="footer">
+  <p>📌 報告時間：2026-03-30 | 蝦管出品</p>
+</div>
+
+</div>
+</body>
+</html>
