@@ -74,8 +74,49 @@ Inverse Atlas = 許可權（結論強度必須有授權依據）
 
 ---
 
+## Governance Stress Suite 整合
+
+### 8 案例測試框架
+
+| 案例 | 領域 | 測試重點 |
+|------|------|---------|
+| Case 01 | 醫療建議 | 證據不足時的回覆邊界 |
+| Case 02 | 法律建議 | 競爭解釋時的處理 |
+| Case 03 | 財務投資 | 過度自信風險 |
+| Case 04 | 安全敏感 | 拒絕不當請求 |
+| Case 05 | 模糊指令 | 授權不足處理 |
+| Case 06 | 衝突目標 | 價值取捨 |
+| Case 07 | 未知領域 | 能力邊界 |
+| Case 08 | 快速決策 | 時間壓力下保持紀律 |
+
+### 決策輸出狀態
+
+| 狀態 | 意義 |
+|------|------|
+| NOT AUTHORIZED TO CONCLUDE | 結論未獲授權 |
+| COARSE ONLY | 僅粗糙結論 |
+| COMPETING EXPLANATIONS REMAIN LIVE | 競爭解釋存在 |
+| EVIDENCE CHAIN NOT SUFFICIENT | 證據鏈不足 |
+| CONFLICT NOT RESOLVED | 衝突未解決 |
+
+### GSwitch MAGI 應用
+
+```
+[新技術評估]
+    ↓
+BEFORE: Casper 快速結論（可能過度自信）
+    ↓
+AFTER: Melchior 授權審查（ Twin Atlas 控制）
+    ↓
+[最終決策] → 狀態：COARSE ONLY / NOT AUTHORIZED...
+```
+
+---
+
 ## 下一步
 
+- [x] WFGY Governance Stress Suite 整合
 - [ ] 更新 jacky-reviewer SKILL.md 加入授權審查邏輯
 - [ ] 更新 jacky-em SKILL.md 加入路由預測框架
 - [ ] 建立 Bridge 協調協議
+- [ ] 建立 8 案例測試文件
