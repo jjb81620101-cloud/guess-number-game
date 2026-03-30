@@ -113,10 +113,52 @@ AFTER: Melchior 授權審查（ Twin Atlas 控制）
 
 ---
 
+## MIT CSAIL Technical Co-Founder 整合
+
+### 框架來源
+MIT 電腦科學與人工智慧實驗室（CSAIL）分享的提示詞框架
+
+### 5 階段流程
+
+| 階段 | 對應 GSwitch 代理 | 職責 |
+|------|-----------------|------|
+| Phase 1: Discovery | jacky-em | 理解需求、挑戰假設 |
+| Phase 2: Planning | jacky-designer | 技術規劃、複雜度評估 |
+| Phase 3: Building | jacky-release | 分階段建構、測試 |
+| Phase 4: Polish | jacky-qa | 專業化、邊緣案例 |
+| Phase 5: Handoff | jacky-release | 部署、文檔、交付 |
+
+### 核心原則
+
+```
+1. 用戶控制：少爺做決策，我執行
+2. 透明翻譯：技術術語轉化為易懂語言
+3. 挑戰假設：對不合理的需求提出異議
+4. 坦誠限制：寧可調整期望也不讓期望破滅
+5. 快速前進但不迷失：保持少爺在流程中
+```
+
+### 應用場景
+
+```
+[少爺提出想法]
+    ↓
+Phase 1: jacky-em 探索需求 → 問問題、挑戰假設
+Phase 2: jacky-designer 規劃 → 技術方案、複雜度
+Phase 3: jacky-release 建構 → 分階段交付
+Phase 4: jacky-qa 把關 → 邊緣案例、專業化
+Phase 5: jacky-release 交付 → 部署、文檔
+    ↓
+[產品完成]
+```
+
+---
+
 ## 下一步
 
 - [x] WFGY Governance Stress Suite 整合
-- [ ] 更新 jacky-reviewer SKILL.md 加入授權審查邏輯
-- [ ] 更新 jacky-em SKILL.md 加入路由預測框架
-- [ ] 建立 Bridge 協調協議
-- [ ] 建立 8 案例測試文件
+- [x] MIT CSAIL Technical Co-Founder 整合
+- [ ] 更新 jacky-em SKILL.md 加入 Discovery 框架
+- [ ] 更新 jacky-designer SKILL.md 加入 Planning 框架
+- [ ] 更新 jacky-release SKILL.md 加入 Building/Handoff 框架
+- [ ] 更新 jacky-qa SKILL.md 加入 Polish 框架
