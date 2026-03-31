@@ -71,7 +71,7 @@ button {
   border: 2px solid #fff;
   background: #fff;
 }
-canvas {
+#board {
   border: 3px solid #8B4513;
   border-radius: 8px;
   background: #DEB887;
@@ -88,6 +88,7 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
 .message.win {
   background: rgba(0,255,136,0.2);
@@ -128,7 +129,7 @@ canvas {
 
 <div class="game-info">
   <div class="current-player black" id="player-display">
-    <span class="stone black"></span>
+    <span class="stone black" id="stone-icon"></span>
     <span id="player-text">黑子先行</span>
   </div>
 </div>
@@ -142,12 +143,13 @@ const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const GRID_SIZE = 15;
 const CELL_SIZE = canvas.width / (GRID_SIZE + 1);
-const STONE_RADIUS = CELL_SIZE * 0.4;
+const STONE_RADIUS = CELL_SIZE * 0.42;
+const OFFSET = CELL_SIZE;
 
 let board = [];
 let currentPlayer = 'black';
 let gameOver = false;
-let mode = 'pvp'; // 'pvp' or 'ai'
+let mode = 'pvp';
 let aiThinking = false;
 
 function initBoard() {
@@ -161,27 +163,35 @@ function initBoard() {
 }
 
 function drawBoard() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // 背景
+  // 背景木紋
   ctx.fillStyle = '#DEB887';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // 網格
+  // 木紋效果
+  ctx.strokeStyle = 'rgba(139, 69, 19, 0.1)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < canvas.height; i += 3) {
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(canvas.width, i);
+    ctx.stroke();
+  }
+  
+  // 網格線
   ctx.strokeStyle = '#8B4513';
   ctx.lineWidth = 1;
   
   for (let i = 0; i < GRID_SIZE; i++) {
     // 垂直線
     ctx.beginPath();
-    ctx.moveTo(CELL_SIZE * (i + 1), CELL_SIZE);
-    ctx.lineTo(CELL_SIZE * (i + 1), CELL_SIZE * GRID_SIZE);
+    ctx.moveTo(OFFSET + i * CELL_SIZE, OFFSET);
+    ctx.lineTo(OFFSET + i * CELL_SIZE, OFFSET + (GRID_SIZE - 1) * CELL_SIZE);
     ctx.stroke();
     
     // 水平線
     ctx.beginPath();
-    ctx.moveTo(CELL_SIZE, CELL_SIZE * (i + 1));
-    ctx.lineTo(CELL_SIZE * GRID_SIZE, CELL_SIZE * (i + 1));
+    ctx.moveTo(OFFSET, OFFSET + i * CELL_SIZE);
+    ctx.lineTo(OFFSET + (GRID_SIZE - 1) * CELL_SIZE, OFFSET + i * CELL_SIZE);
     ctx.stroke();
   }
   
@@ -192,11 +202,45 @@ function drawBoard() {
   ctx.fillStyle = '#8B4513';
   starPoints.forEach(([x, y]) => {
     ctx.beginPath();
-    ctx.arc(CELL_SIZE * (x + 1), CELL_SIZE * (y + 1), 4, 0, Math.PI * 2);
+    ctx.arc(OFFSET + x * CELL_SIZE, OFFSET + y * CELL_SIZE, 5, 0, Math.PI * 2);
     ctx.fill();
   });
+}
+
+function drawStone(x, y, color) {
+  const cx = OFFSET + x * CELL_SIZE;
+  const cy = OFFSET + y * CELL_SIZE;
   
-  // 繪製棋子
+  // 陰影
+  ctx.beginPath();
+  ctx.arc(cx + 2, cy + 2, STONE_RADIUS, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fill();
+  
+  // 棋子本體
+  ctx.beginPath();
+  ctx.arc(cx, cy, STONE_RADIUS, 0, Math.PI * 2);
+  const gradient = ctx.createRadialGradient(cx - 4, cy - 4, 0, cx, cy, STONE_RADIUS);
+  if (color === 'black') {
+    gradient.addColorStop(0, '#555');
+    gradient.addColorStop(0.5, '#333');
+    gradient.addColorStop(1, '#1a1a1a');
+  } else {
+    gradient.addColorStop(0, '#ffffff');
+    gradient.addColorStop(0.5, '#f0f0f0');
+    gradient.addColorStop(1, '#cccccc');
+  }
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  
+  // 棋子邊框
+  ctx.strokeStyle = color === 'black' ? '#000' : '#999';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function redrawAll() {
+  drawBoard();
   for (let i = 0; i < GRID_SIZE; i++) {
     for (let j = 0; j < GRID_SIZE; j++) {
       if (board[i][j]) {
@@ -206,43 +250,15 @@ function drawBoard() {
   }
 }
 
-function drawStone(x, y, color) {
-  const cx = CELL_SIZE * (x + 1);
-  const cy = CELL_SIZE * (y + 1);
-  
-  // 陰影
-  ctx.beginPath();
-  ctx.arc(cx + 2, cy + 2, STONE_RADIUS, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.fill();
-  
-  // 棋子
-  ctx.beginPath();
-  ctx.arc(cx, cy, STONE_RADIUS, 0, Math.PI * 2);
-  const gradient = ctx.createRadialGradient(cx - 3, cy - 3, 0, cx, cy, STONE_RADIUS);
-  if (color === 'black') {
-    gradient.addColorStop(0, '#666');
-    gradient.addColorStop(1, '#333');
-  } else {
-    gradient.addColorStop(0, '#fff');
-    gradient.addColorStop(1, '#ccc');
-  }
-  ctx.fillStyle = gradient;
-  ctx.fill();
-  
-  // 邊框
-  ctx.strokeStyle = color === 'black' ? '#111' : '#999';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-}
-
-function getGridPos(clientX, clientY) {
+function getGridPos(e) {
   const rect = canvas.getBoundingClientRect();
-  const x = clientX - rect.left;
-  const y = clientY - rect.top;
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
   
-  const gridX = Math.round(x / CELL_SIZE) - 1;
-  const gridY = Math.round(y / CELL_SIZE) - 1;
+  const gridX = Math.round((x - OFFSET) / CELL_SIZE);
+  const gridY = Math.round((y - OFFSET) / CELL_SIZE);
   
   if (gridX >= 0 && gridX < GRID_SIZE && gridY >= 0 && gridY < GRID_SIZE) {
     return [gridX, gridY];
@@ -286,16 +302,20 @@ function checkWin(x, y, color) {
 
 function updateDisplay() {
   const display = document.getElementById('player-display');
+  const stoneIcon = document.getElementById('stone-icon');
   const text = document.getElementById('player-text');
   
   display.className = 'current-player ' + currentPlayer;
+  stoneIcon.className = 'stone ' + currentPlayer;
   text.textContent = currentPlayer === 'black' ? '黑子' : '白子';
 }
 
 function showMessage(msg, isWin = false) {
   const msgEl = document.getElementById('message');
   const color = currentPlayer === 'black' ? 'black' : 'white';
-  msgEl.innerHTML = `<span class="stone ${color}"></span>${msg}`;
+  msgEl.innerHTML = isWin 
+    ? `<span class="stone ${color}"></span>${msg}` 
+    : msg;
   msgEl.className = 'message' + (isWin ? ' win' : '');
 }
 
@@ -303,12 +323,12 @@ function placeStone(x, y) {
   if (gameOver || board[x][y] || aiThinking) return false;
   
   board[x][y] = currentPlayer;
-  drawBoard();
+  redrawAll();
   
   if (checkWin(x, y, currentPlayer)) {
     gameOver = true;
     const winner = currentPlayer === 'black' ? '黑子' : '白子';
-    showMessage(`🎉 ${winner}獲勝！`, true);
+    showMessage(`🎉 ${winner}勝利！`, true);
     return true;
   }
   
@@ -334,7 +354,6 @@ function placeStone(x, y) {
   return true;
 }
 
-// AI 邏輯
 function evaluatePosition(x, y, color) {
   let score = 0;
   const directions = [[1, 0], [0, 1], [1, 1], [1, -1]];
@@ -342,7 +361,6 @@ function evaluatePosition(x, y, color) {
   for (const [dx, dy] of directions) {
     let count = 1;
     let openEnds = 0;
-    let blocked = false;
     
     // 正方向
     for (let i = 1; i <= 4; i++) {
@@ -353,10 +371,7 @@ function evaluatePosition(x, y, color) {
         else if (board[nx][ny] === null) {
           openEnds++;
           break;
-        } else {
-          blocked = true;
-          break;
-        }
+        } else break;
       }
     }
     
@@ -369,23 +384,19 @@ function evaluatePosition(x, y, color) {
         else if (board[nx][ny] === null) {
           openEnds++;
           break;
-        } else {
-          blocked = true;
-          break;
-        }
+        } else break;
       }
     }
     
-    // 評分
-    if (count >= 5) score += 10000;
-    else if (count === 4 && openEnds === 2) score += 5000;
+    if (count >= 5) score += 100000;
+    else if (count === 4 && openEnds === 2) score += 10000;
     else if (count === 4 && openEnds === 1) score += 1000;
-    else if (count === 3 && openEnds === 2) score += 500;
+    else if (count === 3 && openEnds === 2) score += 1000;
     else if (count === 3 && openEnds === 1) score += 100;
-    else if (count === 2 && openEnds === 2) score += 50;
+    else if (count === 2 && openEnds === 2) score += 100;
   }
   
-  // 中心位置加分
+  // 中心加分
   const center = Math.floor(GRID_SIZE / 2);
   const distFromCenter = Math.abs(x - center) + Math.abs(y - center);
   score += (14 - distFromCenter) * 2;
@@ -398,9 +409,6 @@ function aiMove() {
   showMessage('🤖 AI 思考中...');
   
   setTimeout(() => {
-    let bestScore = -Infinity;
-    let bestMove = null;
-    
     const opponent = currentPlayer;
     
     // 檢查 AI 是否能贏
@@ -436,7 +444,10 @@ function aiMove() {
       }
     }
     
-    // 評估所有位置
+    // 找最佳位置
+    let bestScore = -Infinity;
+    let bestMove = null;
+    
     for (let i = 0; i < GRID_SIZE; i++) {
       for (let j = 0; j < GRID_SIZE; j++) {
         if (!board[i][j]) {
@@ -456,11 +467,11 @@ function aiMove() {
     if (bestMove) {
       placeStone(bestMove[0], bestMove[1]);
     }
-  }, 500);
+  }, 300);
 }
 
 canvas.addEventListener('click', (e) => {
-  const pos = getGridPos(e.clientX, e.clientY);
+  const pos = getGridPos(e);
   if (!pos) return;
   
   const [x, y] = pos;
@@ -482,15 +493,14 @@ function resetGame() {
   currentPlayer = 'black';
   aiThinking = false;
   initBoard();
-  drawBoard();
+  redrawAll();
   updateDisplay();
-  document.getElementById('message').textContent = '點擊棋盤開始遊戲';
-  document.getElementById('message').className = 'message';
+  showMessage('點擊棋盤開始遊戲');
 }
 
 // 初始化
 initBoard();
-drawBoard();
+redrawAll();
 updateDisplay();
 </script>
 
