@@ -447,6 +447,7 @@ canvas {
     }
   }
 
+  // 暴露全域函數
   function setMode(newMode) {
     mode = newMode;
     document.getElementById('btn-pvp').classList.toggle('active', mode === 'pvp');
@@ -464,6 +465,9 @@ canvas {
     updateDisplay();
     showMessage('點擊棋盤開始');
   }
+
+  window.setMode = setMode;
+  window.resetGame = resetGame;
 
   // 初始化
   window.addEventListener('resize', () => { resizeCanvas(); redrawAll(); });
