@@ -167,6 +167,26 @@ updated: 2026-04-08
 | `tools/registry.yaml` | 工具註冊表 |
 | `permissions.yaml` | 權限系統 |
 | `memory/semantic/` | 語義記憶 |
+| `tools/auto-compact.sh` | 自動上下文壓縮 |
+| `tools/context-manager.py` | Token 追蹤管理 |
+| `state/active-task.md` | 任務進度追蹤 |
+
+## 上下文管理（自動壓縮）
+
+每次執行任務前，檢查上下文狀態：
+
+```bash
+# 檢查當前狀態
+python3 tools/context-manager.py status
+
+# 如果需要壓縮，執行
+bash tools/auto-compact.sh compact
+```
+
+**觸發條件：**
+- Token 使用率達到設定閾值（預設 150,000）
+- 由 OpenClaw cron 每 30 分鐘自動檢查
+- 或由代理在執行任務前主動檢查
 
 ---
 
