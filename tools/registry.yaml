@@ -1,6 +1,7 @@
 # tools/registry.yaml
-# OpenClaw 工具註冊表 — Harness Engineering Phase 1
-# 版本：1.0.0 | 更新：2026-04-08
+# OpenClaw 工具註冊表 — Harness Engineering
+# 版本：1.1.0 | 更新：2026-04-08
+# 新增：上下文自動壓縮優化（借鑒 Claude Code）
 
 tools:
   # ===== 研究類工具 =====
@@ -385,3 +386,43 @@ categories:
   scheduling: 排程
   media: 圖片/媒體
   system: 系統級
+
+# ===== 上下文管理（Token 優化）=====
+context_management:
+  enabled: true
+  description: "自動管理對話上下文，防止 Token 過度消耗"
+
+  # 自動壓縮設定
+  auto_compact:
+    enabled: true
+    threshold: 150000      # 開始壓縮的 token 數
+    target: 100000        # 壓縮後的目標 token 數
+    preserve_recent: 20   # 保留最近 N 條對話
+    compress_system_prompt: false  # 是否壓縮系統提示詞
+
+  # 配額監控
+  quota_monitoring:
+    enabled: true
+    warning_threshold: 0.8   # 80% 時發出警告
+    critical_threshold: 0.95 # 95% 時暫停非必要操作
+
+  # MiniMax 專用設定（可調整）
+  minimax:
+    context_window: 1000000  # MiniMax 上下文窗口
+    recommended_compact_threshold: 150000  # 建議壓縮閾值
+    max_tokens_per_response: 8192
+
+  # 壓縮策略
+  compaction_strategy:
+    - name: "aggressive"
+      threshold: 200000
+      target: 80000
+      description: "積極壓縮，適用於長任務"
+    - name: "moderate"
+      threshold: 150000
+      target: 100000
+      description: "適中壓縮，預設策略"
+    - name: "conservative"
+      threshold: 100000
+      target: 70000
+      description: "保守壓縮，保留更多上下文"
