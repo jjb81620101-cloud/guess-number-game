@@ -52,6 +52,8 @@ _
 - [x] 建立 status.sh 狀態檢查腳本
 - [x] 建立 INTEGRATION.md 整合指南
 - [x] Control Center UI 已運行於 http://127.0.0.1:4310/
+- [x] **自動壓縮系統** — Token 閾值 150k，每 30 分鐘檢查
+- [x] **Cron Job** — `cc0eb8eb-f58e-4e8b-a9cf-26acb15a55d6`
 
 ## 歷史蒸餾記錄
 
