@@ -224,21 +224,24 @@ task:
 
 ## 🚀 優先實作順序
 
-### Phase 1：核心框架（第 1-2 天）
-- [ ] 建立 `tools/registry.yaml`（工具註冊表）
-- [ ] 建立 `permissions.yaml`（權限系統）
-- [ ] 標準化 `skills/` 的 YAML frontmatter
-- [ ] 建立 `memory/semantic/index.md`（記憶索引）
+### Phase 1：核心框架 ✅
+- [x] 建立 `tools/registry.yaml`（工具註冊表）
+- [x] 建立 `permissions.yaml`（權限系統）
+- [x] 標準化 `skills/` 的 YAML frontmatter
+- [x] 建立 `memory/semantic/index.md`（記憶索引）
 
-### Phase 2：代理協調（第 3-4 天）
-- [ ] 定義 `agents/` 代理規格
-- [ ] 實作 `workflows/` 標準流程
-- [ ] 建立 `state/tasks/` 任務追蹤
+### Phase 2：代理協調 ✅
+- [x] 定義 `agents/` 代理規格
+- [x] 實作 `workflows/` 標準流程
+- [x] 建立 `state/tasks/` 任務追蹤
 
-### Phase 3：自動化（第 5-7 天）
-- [ ] 建立 cron job 自動記憶蒸餾
-- [ ] 實作多代理協調協議
-- [ ] 建立監控儀表板（對接 openclaw-control-center）
+### Phase 3：自動化 ✅
+- [x] 安裝與設定 openclaw-control-center
+- [x] 建立 Control Center 啟動腳本 (`start.sh`)
+- [x] 建立狀態檢查腳本 (`status.sh`)
+- [x] 建立 Control Center 整合指南 (`INTEGRATION.md`)
+- [ ] ~~對接 cron job 自動記憶蒸餾~~（Phase 3.5）
+- [ ] ~~對接任務佇列視覺化~~（Control Center 內建）
 
 ---
 
