@@ -1,0 +1,217 @@
+# permissions.yaml
+# OpenClaw 權限系統 — Harness Engineering Phase 1
+# 版本：1.0.0 | 更新：2026-04-08
+# 灵感来源：OpenHarness permissions system
+
+# ===== 權限模式 =====
+modes:
+  # 標準模式（預設）
+  default:
+    description: 標準工作模式，需要確認高風險操作
+    write_confirmation: true
+    exec_confirmation: true
+    delete_confirmation: true
+    external_send_confirmation: true
+    allow_writes: true
+
+  # 僅規劃模式（PLAN mode）
+  plan:
+    description: 仅生成计划，不执行任何实际操作
+    write_confirmation: false
+    exec_confirmation: false
+    delete_confirmation: false
+    external_send_confirmation: false
+    allow_writes: false  # 禁止寫入磁碟
+    read_only: true
+
+  # 全自動模式（已驗證流程）
+  full_auto:
+    description: 信任流程，減少確認提示
+    write_confirmation: false
+    exec_confirmation: false
+    delete_confirmation: false
+    external_send_confirmation: false
+    allow_writes: true
+
+# ===== 當前啟用模式 =====
+current_mode: default
+
+# ===== 路徑規則 =====
+path_rules:
+  # 工作區域（可寫）
+  - pattern: "~/.openclaw/workspace/**"
+    description: 主要工作區
+    risk_level: medium
+    allow: true
+    require_confirmation: true
+
+  - pattern: "~/.openclaw/workspace/**/*.md"
+    description: Markdown 文件
+    risk_level: low
+    allow: true
+    require_confirmation: false
+
+  - pattern: "~/.openclaw/workspace/**/*.pdf"
+    description: PDF 文件
+    risk_level: low
+    allow: true
+    require_confirmation: false
+
+  # 系統設定（禁止修改）
+  - pattern: "~/.openclaw/openclaw.json"
+    description: OpenClaw 主設定檔
+    risk_level: critical
+    allow: false
+    require_confirmation: true
+    note: "需要少爺明確授權"
+
+  - pattern: "~/.openclaw/models.json"
+    description: 模型設定檔
+    risk_level: critical
+    allow: false
+    require_confirmation: true
+    note: "需要少爺明確授權"
+
+  - pattern: "~/.openclaw/config/**"
+    description: 設定檔目錄
+    risk_level: critical
+    allow: false
+    require_confirmation: true
+    note: "需要少爺明確授權"
+
+  # 系統級目錄（禁止）
+  - pattern: "/system/**"
+    description: 系統目錄
+    risk_level: critical
+    allow: false
+    require_confirmation: false
+
+  - pattern: "/etc/**"
+    description: 系統配置
+    risk_level: critical
+    allow: false
+    require_confirmation: false
+
+  - pattern: "/usr/**"
+    description: 系続程式
+    risk_level: critical
+    allow: false
+    require_confirmation: false
+
+# ===== 工具黑名單 =====
+denied_tools:
+  # 危險命令
+  - exec:
+      command_patterns:
+        - "rm -rf /*"
+        - "rm -rf /"
+        - "dd if=* of=/dev/**"
+        - "mkfs.*"
+        - "drop table.*"
+        - "delete from.*without where"
+
+  # 系統級操作
+  - cron_remove:
+      condition: "all"
+      note: "刪除 cron job 需每次確認"
+
+  - exec:
+      condition: "elevated=true"
+      note: "sudo/root 權限執行需每次確認"
+
+# ===== 允許清單（白名單）=====
+# 預設允許的工具（無需確認）
+allowed_tools:
+  # 讀取類
+  - read
+  - file_read
+  - list_files
+  - search_files
+  - list_events
+  - get_event
+  - search_emails
+  - list_labels
+  - get_profile
+  - search_contacts
+  - list_contacts
+  - sessions_list
+  - sessions_history
+  - cron_list
+
+  # 搜尋類
+  - web_search
+  - web_fetch
+  - tavily_search
+  - tavily_extract
+  - tavily_crawl
+  - tavily_research
+
+  # 分析類
+  - image_analyze
+  - image
+
+# ===== 需要確認的工具（高風險）=====
+tools_requiring_confirmation:
+  # 寫入類
+  - write
+  - file_write
+  - edit
+  - create_doc
+  - create_spreadsheet
+  - create_presentation
+  - update_sheet_values
+  - append_sheet_values
+  - update_event
+
+  # 刪除類
+  - delete_file
+  - delete_event
+  - trash_email
+
+  # 對外發送
+  - send_email
+  - reply_to_email
+  - unsubscribe_email
+
+  # 系統級
+  - exec
+  - cron_add
+  - cron_remove
+
+# ===== 代理協調限制 =====
+agent_coordination:
+  max_concurrent_subagents: 5
+  max_subagent_timeout_seconds: 3600
+  require_task_description: true
+  allow_cross_workspace: false
+
+# ===== 外部 API 限制 =====
+external_api:
+  rate_limit_enabled: true
+  max_requests_per_minute: 60
+  require_quota_check:
+    - image_generate  # 成本高，需追蹤配額
+    - tavily_research  # 成本高，需追蹤配額
+
+# ===== 審計日誌 =====
+audit_log:
+  enabled: true
+  log_path: "~/.openclaw/workspace/state/audit.log"
+  log_high_risk_actions: true
+  log_external_communications: true
+  log_file_modifications: true
+  log_deletions: true
+
+# ===== 緊急應變 =====
+emergency:
+  # 緊急停止開關
+  enable_emergency_stop: true
+  
+  # 緊急模式（完全停機）
+  emergency_mode:
+    description: "緊急狀況下停用所有寫入和外部通訊"
+    allow_reads: true
+    allow_planning: true
+    allow_external_send: false
+    allow_writes: false
+    allow_exec: false

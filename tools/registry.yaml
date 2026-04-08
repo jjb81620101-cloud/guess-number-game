@@ -1,0 +1,387 @@
+# tools/registry.yaml
+# OpenClaw 工具註冊表 — Harness Engineering Phase 1
+# 版本：1.0.0 | 更新：2026-04-08
+
+tools:
+  # ===== 研究類工具 =====
+  web_search:
+    name: web_search
+    description: 網頁搜尋（使用 Tavily）
+    category: research
+    risk_level: low
+    auth_required: false
+    confirmation_required: false
+    quota_cost: medium
+
+  web_fetch:
+    name: web_fetch
+    description: 擷取網頁內容（HTML → markdown）
+    category: research
+    risk_level: low
+    auth_required: false
+    confirmation_required: false
+
+  tavily_search:
+    name: tavily_search
+    description: Tavily AI 優化搜尋
+    category: research
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  tavily_crawl:
+    name: tavily_crawl
+    description: 深度爬取網站（多頁面）
+    category: research
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  tavily_extract:
+    name: tavily_extract
+    description: 精準提取特定 URL 內容
+    category: research
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  tavily_research:
+    name: tavily_research
+    description: 深度研究報告（多源綜合）
+    category: research
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+    timeout: long  # 30-120 秒
+
+  # ===== 檔案 I/O 工具 =====
+  file_read:
+    name: read
+    description: 讀取檔案內容
+    category: file_io
+    risk_level: low
+    auth_required: false
+    confirmation_required: false
+    path_restriction: null  # 全部可讀
+
+  file_write:
+    name: write
+    description: 寫入或建立檔案
+    category: file_io
+    risk_level: medium
+    auth_required: false
+    confirmation_required: true
+    path_rules:
+      - pattern: "~/.openclaw/workspace/**"
+        allow: true
+      - pattern: "~/.openclaw/workspace/**/*.md"
+        allow: true
+      - pattern: "~/.openclaw/workspace/**/*.pdf"
+        allow: true
+      - pattern: "/system/**"
+        allow: false
+      - pattern: "~/.openclaw/config/**"
+        allow: false
+
+  file_edit:
+    name: edit
+    description: 編輯現有檔案（精確取代）
+    category: file_io
+    risk_level: medium
+    auth_required: false
+    confirmation_required: true
+    path_rules:
+      - pattern: "~/.openclaw/workspace/**"
+        allow: true
+      - pattern: "~/.openclaw/config/**"
+        allow: false
+
+  file_delete:
+    name: trash_email (email) / delete_file (drive)
+    description: 刪除檔案或郵件
+    category: file_io
+    risk_level: high
+    auth_required: false
+    confirmation_required: true
+    allow_on_first_confirm: false
+
+  exec_shell:
+    name: exec
+    description: 執行 Shell 命令
+    category: system
+    risk_level: high
+    auth_required: false
+    confirmation_required: true
+    elevated_required: true
+    denied_commands:
+      - "rm -rf /"
+      - "dd if=*"
+      - "mkfs"
+      - "drop table"
+
+  # ===== 通訊工具 =====
+  send_email:
+    name: send_email
+    description: 發送郵件
+    category: communication
+    risk_level: high
+    auth_required: true
+    confirmation_required: true
+    allow_on_first_confirm: false
+    audit_log: true
+
+  reply_email:
+    name: reply_to_email
+    description: 回覆郵件
+    category: communication
+    risk_level: high
+    auth_required: true
+    confirmation_required: true
+    audit_log: true
+
+  discord_message:
+    name: (Discord channel routing)
+    description: 發送 Discord 訊息
+    category: communication
+    risk_level: medium
+    auth_required: true
+    confirmation_required: false  # 已確認來自授權用戶
+
+  # ===== 企業文書工具 =====
+  create_doc:
+    name: create_doc
+    description: 建立 Google Doc
+    category: productivity
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  create_spreadsheet:
+    name: create_spreadsheet
+    description: 建立 Google Sheets
+    category: productivity
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  create_presentation:
+    name: create_presentation
+    description: 建立 Google Slides
+    category: productivity
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  update_sheet:
+    name: update_sheet_values
+    description: 更新 Google Sheets 內容
+    category: productivity
+    risk_level: medium
+    auth_required: true
+    confirmation_required: false  # 非對外
+
+  export_file:
+    name: export_file
+    description: 匯出 Google Doc/Sheet
+    category: productivity
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  # ===== 行事曆工具 =====
+  list_events:
+    name: list_events
+    description: 列出行事曆事件
+    category: calendar
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  create_event:
+    name: create_event
+    description: 建立行事曆事件
+    category: calendar
+    risk_level: medium
+    auth_required: true
+    confirmation_required: false  # 行事曆隔離
+
+  update_event:
+    name: update_event
+    description: 更新行事曆事件
+    category: calendar
+    risk_level: medium
+    auth_required: true
+    confirmation_required: false
+
+  delete_event:
+    name: delete_event
+    description: 刪除行事曆事件
+    category: calendar
+    risk_level: high
+    auth_required: true
+    confirmation_required: true
+
+  quick_add_event:
+    name: quick_add_event
+    description: 自然語言建立行事曆事件
+    category: calendar
+    risk_level: medium
+    auth_required: true
+    confirmation_required: false
+
+  # ===== 聯絡人工具 =====
+  search_contacts:
+    name: search_contacts
+    description: 搜尋 Google 聯絡人
+    category: crm
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  create_contact:
+    name: create_contact
+    description: 建立聯絡人
+    category: crm
+    risk_level: medium
+    auth_required: true
+    confirmation_required: false
+
+  # ===== 代理協調工具 =====
+  spawn_subagent:
+    name: sessions_spawn
+    description: 啟動子代理（隔離 session）
+    category: coordination
+    risk_level: medium
+    auth_required: false
+    confirmation_required: false  # 主控代理決策
+    max_concurrent: 5
+
+  sessions_send:
+    name: sessions_send
+    description: 跨 session 發送訊息
+    category: coordination
+    risk_level: low
+    auth_required: false
+    confirmation_required: false
+
+  sessions_list:
+    name: sessions_list
+    description: 列出活跃 session
+    category: coordination
+    risk_level: low
+    auth_required: false
+    confirmation_required: false
+
+  sessions_history:
+    name: sessions_history
+    description: 取得 session 歷史
+    category: coordination
+    risk_level: low
+    auth_required: false
+    confirmation_required: false
+
+  # ===== 排程工具 =====
+  cron_list:
+    name: cron list
+    description: 列出排程任務
+    category: scheduling
+    risk_level: low
+    auth_required: false
+    confirmation_required: false
+
+  cron_add:
+    name: cron add
+    description: 新增排程任務
+    category: scheduling
+    risk_level: high
+    auth_required: false
+    confirmation_required: true
+    # 禁止建立過多 cron job
+    max_crons_per_user: 20
+
+  cron_remove:
+    name: cron remove
+    description: 刪除排程任務
+    category: scheduling
+    risk_level: high
+    auth_required: false
+    confirmation_required: true
+    allow_on_first_confirm: false
+
+  # ===== 圖片/媒體工具 =====
+  image_generate:
+    name: image_generate
+    description: AI 生成圖片
+    category: media
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+    quota_cost: high
+
+  image_analyze:
+    name: image
+    description: 分析圖片內容
+    category: media
+    risk_level: low
+    auth_required: false
+    confirmation_required: false
+
+  # ===== 搜索工具 =====
+  search_files:
+    name: search_files
+    description: 搜尋 Google Drive 檔案
+    category: productivity
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  list_files:
+    name: list_files
+    description: 列出 Google Drive 檔案
+    category: productivity
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  search_emails:
+    name: search_emails
+    description: 搜尋 Gmail
+    category: productivity
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+  list_labels:
+    name: list_labels
+    description: 列出 Gmail 標籤
+    category: productivity
+    risk_level: low
+    auth_required: true
+    confirmation_required: false
+
+# ===== 風險分級說明 =====
+risk_levels:
+  low:
+    description: 無直接風險（讀取、搜尋、查詢）
+    default_action: auto_execute
+  
+  medium:
+    description: 有限風險（寫入、建立、修改）
+    default_action: confirm_then_execute
+  
+  high:
+    description: 高風險（刪除、對外發送、系統級操作）
+    default_action: require_explicit_authorization
+
+# ===== 類別分組 =====
+categories:
+  research: 研究工具（搜尋、爬取、分析）
+  file_io: 檔案操作（讀寫、編輯、刪除）
+  communication: 通訊工具（郵件、訊息）
+  productivity: 企業文書（Doc、Sheet、Slide）
+  calendar: 行事曆
+  crm: 客戶關係
+  coordination: 代理協調
+  scheduling: 排程
+  media: 圖片/媒體
+  system: 系統級
