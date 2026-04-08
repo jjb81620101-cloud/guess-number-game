@@ -77,6 +77,25 @@ _用途：跨 session 知識查詢_
 
 ---
 
+## 👥 代理定義（agents/）
+
+| 檔案 | 標籤 | 說明 |
+|------|------|------|
+| `agents/lobster/SPEC.md` | [agent] [主控] | 主控代理（蝦管）規格 |
+| `agents/researcher/SPEC.md` | [agent] [研究] | 研究代理：網頁搜尋、資料收集 |
+| `agents/writer/SPEC.md` | [agent] [內容] | 內容代理：文案、SEO、社群 |
+| `agents/analyst/SPEC.md` | [agent] [分析] | 分析代理：數據處理、視覺化 |
+| `agents/outreach/SPEC.md` | [agent] [外聯] | 外聯代理：陌生開發、CRM |
+| `agents/_protocols/coordinator-protocol.md` | [protocol] [協調] | 主控代理協調協議 |
+
+## 📋 工作流程（workflows/）
+
+| 檔案 | 標籤 | 說明 |
+|------|------|------|
+| `workflows/research-pipeline.md` | [workflow] [研究] | 標準研究流程 |
+| `workflows/report-pipeline.md` | [workflow] [報告] | 報告生成流程 |
+| `workflows/outreach-pipeline.md` | [workflow] [外聯] | 陌生開發流程 |
+
 ## 🔗 外部連結
 
 - [OpenHarness GitHub](https://github.com/HKUDS/OpenHarness)
